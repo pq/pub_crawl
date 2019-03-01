@@ -88,10 +88,11 @@ class AnalyzeCommand extends BaseCommand {
             }
           }
 
+          // todo (pq): move this up and collect errors from the resolved result.
+          ResolvedUnitResult result = await context.currentSession.getResolvedUnit(filePath);
+
           // AST Visitor callback.
-          ParsedUnitResult unit =
-              await context.currentSession.getParsedUnit(filePath);
-          unit.unit.accept(new AstVisitor());
+          result.unit.accept(new AstVisitor());
         }
 
         // NOTE that an options file will generally not be present since it's not included in pub source archives.
