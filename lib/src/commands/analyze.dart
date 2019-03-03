@@ -15,10 +15,10 @@ import 'package:analyzer/src/generated/source.dart';
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:pub_crawl/contrib/criteria/analyze.dart';
-import 'package:pub_crawl/contrib/visitors/dart.dart';
-import 'package:pub_crawl/contrib/visitors/options.dart';
-import 'package:pub_crawl/contrib/visitors/pubspec.dart';
+import 'package:pub_crawl/hooks/criteria/analyze.dart';
+import 'package:pub_crawl/hooks/visitors/dart.dart';
+import 'package:pub_crawl/hooks/visitors/options.dart';
+import 'package:pub_crawl/hooks/visitors/pubspec.dart';
 import 'package:pub_crawl/src/common.dart';
 
 class AnalyzeCommand extends BaseCommand {

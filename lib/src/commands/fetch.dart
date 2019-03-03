@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:pub_crawl/contrib/criteria/fetch.dart';
+import 'package:pub_crawl/hooks/criteria/fetch.dart';
 import 'package:pub_crawl/src/cache.dart';
 import 'package:pub_crawl/src/common.dart';
 import 'package:pub_crawl/src/package.dart';

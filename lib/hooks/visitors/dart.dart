@@ -8,12 +8,17 @@ import 'package:analyzer/dart/ast/visitor.dart';
 /// (Important: do not move or rename.)
 class AstVisitor extends GeneralizingAstVisitor {
 
+  int count = 0;
+
   /// Called on visit finish.
   void onVisitFinish() {
+    print('Matched $count declarations');
   }
 
   @override
-  visitClassDeclaration(ClassDeclaration node) {
-//    print('... visiting ${node.name.name}');
+  visitMethodDeclaration(MethodDeclaration node) {
+    if (node.name.name == 'debugFillProperties') {
+      ++count;
+    }
   }
 }
