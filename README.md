@@ -1,6 +1,6 @@
 # Pub Crawl 🍻
 
-A tool for fetching and exploring published `pub` packages.
+A tool for fetching and exploring Dart packages published on [`pub`](https://pub.dartlang.org/).
 
 ## Sample Applications
 
