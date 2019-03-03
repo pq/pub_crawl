@@ -26,7 +26,7 @@ Supported commands are:
    (for example, `lint --rules=await_only_futures,avoid_as`)
 * `pub clean` - deletes cached packages
 
-For example, the sequence
+For example,
 
 ```
 dart bin/pub_crawl.dart fetch --max 10 --criteria flutter
