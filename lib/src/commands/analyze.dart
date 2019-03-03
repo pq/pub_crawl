@@ -13,6 +13,7 @@ import 'package:analyzer/src/generated/engine.dart'
     show AnalysisEngine, AnalysisErrorInfo, AnalysisErrorInfoImpl;
 import 'package:analyzer/src/generated/source.dart';
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_crawl/contrib/criteria/analyze.dart';
 import 'package:pub_crawl/contrib/visitors/dart.dart';
@@ -42,6 +43,7 @@ class AnalyzeCommand extends BaseCommand {
   bool get showErrors => !argResults['no-errors'];
 
   @override
+  @mustCallSuper
   FutureOr run() async {
     // todo (pq): check for commandline-defined criteria.
     final criteria = defaultAnalyzeCriteria;
@@ -66,6 +68,9 @@ class AnalyzeCommand extends BaseCommand {
     }
   }
 
+  /// Hook to influence context before analysis.
+  void preAnalyze(AnalysisContext context) {}
+
   Future<List<ErrorsResult>> _analyzeFiles(
       ResourceProvider resourceProvider, List<String> analysisRoots) async {
     List<ErrorsResult> results = <ErrorsResult>[];
@@ -78,6 +83,8 @@ class AnalyzeCommand extends BaseCommand {
         print('Analyzing $relativePath...');
       }
 
+      preAnalyze(context);
+
       for (String filePath in context.contextRoot.analyzedFiles()) {
         if (AnalysisEngine.isDartFileName(filePath)) {
           if (showErrors) {
@@ -89,10 +96,11 @@ class AnalyzeCommand extends BaseCommand {
           }
 
           // todo (pq): move this up and collect errors from the resolved result.
-          ResolvedUnitResult result = await context.currentSession.getResolvedUnit(filePath);
+          ResolvedUnitResult result =
+              await context.currentSession.getResolvedUnit(filePath);
 
           // AST Visitor callback.
-          result.unit.accept(new AstVisitor());
+          result.unit.accept(AstVisitor());
         }
 
         // NOTE that an options file will generally not be present since it's not included in pub source archives.
@@ -140,9 +148,8 @@ String _pluralize(String word, int count) => count == 1 ? word : word + "s";
 
 /// Given an absolute path, return a relative path if the file is contained in
 /// the current directory; return the original path otherwise.
-String _relative(String file) {
-  return file.startsWith(path.current) ? path.relative(file) : file;
-}
+String _relative(String file) =>
+    file.startsWith(path.current) ? path.relative(file) : file;
 
 /// Returns the given error's severity.
 ErrorSeverity _severityIdentity(AnalysisError error) =>
@@ -333,17 +340,16 @@ class CLIError implements Comparable<CLIError> {
   @override
   int compareTo(CLIError other) {
     // severity
-    int compare =
-        _severityCompare[other.severity] - _severityCompare[this.severity];
+    int compare = _severityCompare[other.severity] - _severityCompare[severity];
     if (compare != 0) return compare;
 
     // path
     compare = Comparable.compare(
-        this.sourcePath.toLowerCase(), other.sourcePath.toLowerCase());
+        sourcePath.toLowerCase(), other.sourcePath.toLowerCase());
     if (compare != 0) return compare;
 
     // offset
-    return this.offset - other.offset;
+    return offset - other.offset;
   }
 }
 
