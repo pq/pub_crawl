@@ -7,6 +7,7 @@ class CleanCommand extends BaseCommand {
   @override
   String get name => 'clean';
 
+  @override
   Future run() async {
     print('Deleting cache...');
     await cache.delete();

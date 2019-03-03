@@ -23,6 +23,7 @@ class FetchCommand extends BaseCommand {
 
   bool get install => !argResults['no-install'];
 
+  @override
   Future run() async {
     final maxFetch = toInt(argResults['max'] ?? defaultFetchLimit);
     final criteria =

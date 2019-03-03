@@ -7,6 +7,7 @@ class ListCommand extends BaseCommand {
   @override
   String get name => 'list';
 
+  @override
   Future run() {
     print(argResults.arguments);
     return Future.value();

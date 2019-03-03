@@ -85,16 +85,22 @@ class RemotePackage extends Package {
     return package;
   }
 
+  @override
   String get name => _data['name'];
 
+  @override
   String get archiveUrl => _data['latest']['archive_url'];
 
+  @override
   String get version => _data['latest']['version'];
 
+  @override
   Map<String, dynamic> get dependencies => pubspec['dependencies'];
 
+  @override
   Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
 
+  @override
   String get repository => pubspec['repository'];
 
   @override

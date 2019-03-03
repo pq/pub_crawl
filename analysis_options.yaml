@@ -5,6 +5,7 @@ include: package:pedantic/analysis_options.yaml
 
 linter:
    rules:
+     - annotate_overrides
      - camel_case_types
      - empty_constructor_bodies
      - empty_statements
