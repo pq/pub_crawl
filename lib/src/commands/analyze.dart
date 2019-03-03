@@ -47,7 +47,7 @@ class AnalyzeCommand extends BaseCommand {
   FutureOr run() async {
     // todo (pq): check for commandline-defined criteria.
     final criteria = defaultAnalyzeCriteria;
-    var sourceDirs = cache
+    final sourceDirs = cache
         .list(matching: criteria)
         .map((p) => '$cachePath/${p.sourcePath}')
         .toList();
@@ -71,6 +71,8 @@ class AnalyzeCommand extends BaseCommand {
 
   /// Hook to influence context before analysis.
   void preAnalyze(AnalysisContext context) {}
+
+  final visitor = AstVisitor();
 
   Future<List<ErrorsResult>> _analyzeFiles(
       ResourceProvider resourceProvider, List<String> analysisRoots) async {
@@ -100,7 +102,7 @@ class AnalyzeCommand extends BaseCommand {
               await context.currentSession.getResolvedUnit(filePath);
 
           // AST Visitor callback.
-          result.unit.accept(AstVisitor());
+          result.unit.accept(visitor);
         }
 
         // NOTE that an options file will generally not be present since it's not included in pub source archives.
@@ -118,6 +120,8 @@ class AnalyzeCommand extends BaseCommand {
         }
       }
     }
+    visitor.onVisitFinish();
+
     return results;
   }
 
