@@ -9,4 +9,7 @@ build/
 
 # Directory created by dartdoc
 doc/api/
-/third_party
+
+# Cache directories
+/third_party/cache
+/third_party/index.json
