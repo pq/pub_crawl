@@ -1,5 +1,5 @@
 name: pub_crawl
-description:
+description: Crawls, fetches and queries published pub packages.
 version: 0.0.1
 homepage: https://github.com/pq/pub_crawl
 
