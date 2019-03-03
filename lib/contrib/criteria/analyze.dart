@@ -1,6 +1,8 @@
 import 'package:pub_crawl/src/common.dart';
 import 'package:pub_crawl/src/package.dart';
 
+// ignore_for_file: prefer_expression_function_bodies
+
 /// Define default analyze command criteria here.
 ///
 ///
