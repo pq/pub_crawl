@@ -89,4 +89,4 @@ class AstVisitor extends GeneralizingAstVisitor {
 More examples live in the [example](example) directory. 
 
 
-[pub scoring docs](https://pub.dartlang.org/help#scoring)
+[pub scoring docs]: https://pub.dartlang.org/help#scoring
