@@ -58,11 +58,12 @@ class AnalyzeCommand extends BaseCommand {
 
   Future _analyze(List<String> args) async {
     if (args.isEmpty) {
-      print('Specify one or more files and directories');
+      print('Specify one or more files and directories.');
       return;
     }
     ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
     List<ErrorsResult> results = await _analyzeFiles(resourceProvider, args);
+    print('Finished.');
     if (showErrors) {
       _printAnalysisResults(results);
     }
@@ -79,9 +80,8 @@ class AnalyzeCommand extends BaseCommand {
     for (AnalysisContext context in collection.contexts) {
       final relativePath =
           context.contextRoot.root.path.split('$cachePath/')[1];
-      if (verbose) {
-        print('Analyzing $relativePath...');
-      }
+
+      print('$commandVerb $relativePath...');
 
       preAnalyze(context);
 
@@ -124,7 +124,10 @@ class AnalyzeCommand extends BaseCommand {
   void _printAnalysisResults(List<ErrorsResult> results) {
     List<AnalysisErrorInfo> infos = <AnalysisErrorInfo>[];
     for (ErrorsResult result in results) {
-      infos.add(new AnalysisErrorInfoImpl(result.errors, result.lineInfo));
+      final errors = result.errors.where(showError).toList();
+      if (errors.isNotEmpty) {
+        infos.add(new AnalysisErrorInfoImpl(errors, result.lineInfo));
+      }
     }
     AnalysisStats stats = new AnalysisStats();
     CommandLineOptions options = CommandLineOptions.fromArgs(argResults);
@@ -134,6 +137,10 @@ class AnalyzeCommand extends BaseCommand {
     formatter.flush();
     stats.print();
   }
+
+  bool showError(AnalysisError element) => true;
+
+  String get commandVerb => 'Analyzing';
 }
 
 final Map<String, int> _severityCompare = {
@@ -379,6 +386,7 @@ class HumanErrorFormatter extends ErrorFormatter {
     ansi = new AnsiLogger(this.options.color);
   }
 
+  @override
   void flush() {
     // sort
     List<CLIError> sortedErrors = batchedErrors.toList()..sort();
@@ -415,6 +423,7 @@ class HumanErrorFormatter extends ErrorFormatter {
     batchedErrors.clear();
   }
 
+  @override
   void formatError(
       Map<AnalysisError, LineInfo> errorToLine, AnalysisError error) {
     Source source = error.source;
