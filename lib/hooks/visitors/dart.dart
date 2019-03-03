@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
 /// Passed to all analyzed Dart compilation units.
@@ -8,17 +7,13 @@ import 'package:analyzer/dart/ast/visitor.dart';
 /// (Important: do not move or rename.)
 class AstVisitor extends GeneralizingAstVisitor {
 
-  int count = 0;
-
   /// Called on visit finish.
   void onVisitFinish() {
-    print('Matched $count declarations');
+
   }
 
-  @override
-  visitMethodDeclaration(MethodDeclaration node) {
-    if (node.name.name == 'debugFillProperties') {
-      ++count;
-    }
-  }
+//  @override
+//  visitClassDeclaration(ClassDeclaration node) {
+//    print('... visiting ${node.name.name}');
+//  }
 }
