@@ -1,4 +1,4 @@
-# Pub Crawl
+# Pub Crawl 🍻
 
 A tool for fetching and exploring published `pub` packages.
 
