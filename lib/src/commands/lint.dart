@@ -1,6 +1,4 @@
 import 'package:analyzer/dart/analysis/analysis_context.dart';
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/src/dart/error/lint_codes.dart';
 import 'package:analyzer/src/generated/engine.dart' show AnalysisOptionsImpl;
