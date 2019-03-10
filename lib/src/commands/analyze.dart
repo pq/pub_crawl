@@ -105,9 +105,6 @@ class AnalyzeCommand extends BaseCommand {
           result.unit.accept(visitor);
         }
 
-        // NOTE that an options file will generally not be present since it's not
-        // included in pub source archives.
-        // Request filed: https://github.com/dart-lang/pub/issues/2094
         if (AnalysisEngine.isAnalysisOptionsFileName(filePath)) {
           // Options Visitor callback.
           final optionsFile = AnalysisOptionsFile(filePath);
