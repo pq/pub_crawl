@@ -112,5 +112,8 @@ class Metrics {
 
   Metrics(this._data);
 
-  double get overallScore => _data['scorecard']['overallScore'];
+  double get overallScore {
+    var scorecard = _data['scorecard'];
+    return scorecard != null ? scorecard['overallScore'] : null;
+  }
 }
