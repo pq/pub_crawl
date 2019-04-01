@@ -131,6 +131,11 @@ class Cache {
         final packageName = versionedName.substring(0, separatorIndex);
         final indexedPackage = index.getPackage(packageName);
         if (indexedPackage != null) {
+          for (var criteria in matching ?? <Criteria>[]) {
+            if (!criteria.matches(indexedPackage)) {
+              break;
+            }
+          }
           packages.add(indexedPackage);
         }
       }
@@ -138,6 +143,8 @@ class Cache {
 
     return packages;
   }
+
+  int size() => _cacheDir.existsSync() ? _cacheDir.listSync().length : 0;
 
   Future delete() =>
       _cacheDir.delete(recursive: true).then((_) => _indexFile.delete());
