@@ -10,6 +10,9 @@ typedef PackageIndexer = void Function(Package p, Cache index);
 Directory _cacheDir = Directory('third_party/cache');
 File _indexFile = File('third_party/index.json');
 
+
+// todo (pq): add a cache clean command (to remove old / duplicated libraries)
+
 class Index {
   dynamic _jsonData;
 
@@ -23,7 +26,7 @@ class Index {
       print('Cache index does not exist, creating...');
       _indexFile.createSync(recursive: true);
     }
-    var contents = _indexFile.readAsStringSync();
+    final contents = _indexFile.readAsStringSync();
     _jsonData = contents.isNotEmpty ? jsonDecode(contents) : {};
   }
 
@@ -37,10 +40,22 @@ class Index {
   void add(Package package) {
     package.addToJsonData(_jsonData);
   }
+
+  bool containsSourcePath(String path) {
+    for (var entry in _jsonData.entries) {
+      if (path == entry.value['sourcePath']) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }
 
 class Cache {
   final Index index;
+
+  Directory get dir => _cacheDir;
 
   PackageIndexer onProcess;
 

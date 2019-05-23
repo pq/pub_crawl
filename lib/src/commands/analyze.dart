@@ -18,6 +18,7 @@ import 'package:path/path.dart' as path;
 import 'package:pub_crawl/hooks/criteria/analyze.dart';
 import 'package:pub_crawl/hooks/visitors/dart.dart';
 import 'package:pub_crawl/hooks/visitors/options.dart';
+import 'package:pub_crawl/hooks/visitors/package.dart';
 import 'package:pub_crawl/hooks/visitors/pubspec.dart';
 import 'package:pub_crawl/src/common.dart';
 
@@ -37,6 +38,11 @@ class AnalyzeCommand extends BaseCommand {
   AnalyzeCommand() {
     argParser.addFlag('verbose', help: 'verbose output.');
     argParser.addFlag('color', help: 'color output.');
+
+    argParser.addFlag('install',
+        negatable: true,
+        defaultsTo: true,
+        help: 'install package dependencies.');
     argParser.addFlag('no-errors', help: 'do not report analysis errors.');
   }
 
@@ -47,22 +53,27 @@ class AnalyzeCommand extends BaseCommand {
   FutureOr run() async {
     // todo (pq): check for commandline-defined criteria.
     final criteria = defaultAnalyzeCriteria;
-    final sourceDirs = cache
-        .list(matching: criteria)
-        .map((p) => '$cachePath/${p.sourcePath}')
-        .toList();
-    await _analyze(sourceDirs);
+    final packages = cache.list(matching: criteria);
+
+    final visitor = new PackageVisitor();
+    for (final package in packages) {
+      visitor.visit(cache.getSourceDir(package));
+    }
+    visitor.postVisit();
+
+    await _analyze(packages.map((p) => '$cachePath/${p.sourcePath}').toList());
 
     return Future.value();
   }
 
-  Future _analyze(List<String> args) async {
-    if (args.isEmpty) {
+  Future _analyze(List<String> sourceDirs) async {
+    if (sourceDirs.isEmpty) {
       print('Specify one or more files and directories.');
       return;
     }
     ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
-    List<ErrorsResult> results = await _analyzeFiles(resourceProvider, args);
+    List<ErrorsResult> results =
+        await _analyzeFiles(resourceProvider, sourceDirs);
     print('Finished.');
     if (showErrors) {
       _printAnalysisResults(results);

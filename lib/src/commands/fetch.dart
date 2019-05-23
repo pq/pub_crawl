@@ -69,6 +69,8 @@ class FetchCommand extends BaseCommand {
     int maxCount, {
     void onSkip(Package package, Criteria criteria),
   }) async {
+    var count = 0;
+    // todo (pq): https
     var packagePage = 'http://pub.dartlang.org/api/packages';
     print('Fetching package information from pub.dartlang.org...');
     final packages = <Package>[];
@@ -76,6 +78,8 @@ class FetchCommand extends BaseCommand {
       final packageBody = jsonDecode(await getBody(packagePage));
       for (var packageData in packageBody['packages']) {
         final package = await RemotePackage.init(packageData);
+
+        ++count;
 
         // Filter.
         final failedCriteria =
@@ -99,8 +103,18 @@ class FetchCommand extends BaseCommand {
           break;
         }
       }
+      print(count);
       packagePage = packageBody['next_url'];
     }
+    print('$count packages processed');
+    if (packagePage == null) {
+      print('(Processed all available packages on pub.)');
+    } else {
+      print('(Max processed package count of $maxCount reached.)');
+    }
+
+    print(count);
+
     return packages;
   }
 }

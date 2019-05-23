@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:pub_crawl/src/common.dart';
+
+import 'package:yaml/yaml.dart' as yaml;
 
 abstract class Package {
   double get overallScore;
@@ -14,7 +17,9 @@ abstract class Package {
 
   String get version;
 
-  Map<String, dynamic> get dependencies;
+  Directory get dir => null;
+
+  Map<String, dynamic> get dependencies => pubspec['dependencies'];
 
   Map<String, dynamic> get pubspec;
 
@@ -32,6 +37,7 @@ abstract class Package {
     package.name = name;
     package.version = packageData['version'];
     package.overallScore = packageData['score'];
+    package.dir = Directory('third_party/cache/${packageData['sourcePath']}');
     return package;
   }
 
@@ -42,6 +48,8 @@ abstract class Package {
       'sourcePath': sourcePath,
     };
   }
+
+  bool isFlutterPackage() => dependencies?.containsKey('flutter') == true;
 }
 
 class LocalPackage extends Package {
@@ -49,13 +57,50 @@ class LocalPackage extends Package {
   String archiveUrl;
 
   @override
-  Map<String, dynamic> dependencies;
+  Directory dir;
+
+  @override
+  Map<String, dynamic> pubspec;
 
   @override
   String name;
 
   @override
-  Map<String, dynamic> pubspec;
+  Map<String, dynamic> get dependencies {
+    if (_pubspec == null) {
+      return {};
+    }
+
+    final deps = _pubspec['dependencies']?.value;
+    if (deps is yaml.YamlMap) {
+      return deps.nodes
+          .map((k, v) => MapEntry<String, dynamic>(k.toString(), v));
+    }
+
+//    deps.
+
+    return {};
+  }
+
+  Map<dynamic, yaml.YamlNode> get _pubspec {
+//    if (_pubspec == null) {
+    final pubspecFile = File('${dir.path}/pubspec.yaml');
+    if (pubspecFile.existsSync()) {
+      try {
+        return (yaml.loadYaml(pubspecFile.readAsStringSync()) as yaml.YamlMap)
+            .nodes;
+      } on yaml.YamlException {
+        // Warn?
+      }
+    }
+    return <dynamic, yaml.YamlNode>{};
+
+//    return pubspecFile.existsSync()
+//        ? (yaml.loadYaml(pubspecFile.readAsStringSync()) as yaml.YamlMap).nodes
+//        : <String, dynamic>{};
+//    }
+//    return _pubspec;
+  }
 
   @override
   String repository;
@@ -79,9 +124,18 @@ class RemotePackage extends Package {
 
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
-    var metricsData = jsonDecode((await getBody(
-        'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports')));
-    package.metrics = new Metrics(metricsData);
+    final url =
+        'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
+    final body = await getBody(url);
+    try {
+      var metricsData = jsonDecode(body);
+      package.metrics = new Metrics(metricsData);
+    } on FormatException catch (e) {
+      print('unable to decode json from: $url');
+      print(e);
+      print(body);
+      rethrow;
+    }
     return package;
   }
 
@@ -95,9 +149,6 @@ class RemotePackage extends Package {
   String get version => _data['latest']['version'];
 
   @override
-  Map<String, dynamic> get dependencies => pubspec['dependencies'];
-
-  @override
   Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
 
   @override
@@ -108,7 +159,7 @@ class RemotePackage extends Package {
 }
 
 class Metrics {
-  var _data;
+  final _data;
 
   Metrics(this._data);
 

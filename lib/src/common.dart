@@ -109,6 +109,11 @@ abstract class PubspecFileVisitor {
   void visit(PubspecFile file) {}
 }
 
+/// A simple visitor for package roots.
+abstract class PackageRootVisitor {
+  void visit(Directory root) {}
+}
+
 class PubspecFile {
   final File file;
 
