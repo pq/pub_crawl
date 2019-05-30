@@ -130,17 +130,17 @@ class PubspecFile {
 
 YamlMap _readYamlFromString(String optionsSource) {
   if (optionsSource == null) {
-    return new YamlMap();
+    return YamlMap();
   }
   try {
     YamlNode doc = loadYamlNode(optionsSource);
     if (doc is YamlMap) {
       return doc;
     }
-    return new YamlMap();
+    return YamlMap();
   } on YamlException catch (e) {
-    throw new FormatException(e.message, e.span);
+    throw FormatException(e.message, e.span);
   } catch (e) {
-    throw new FormatException('Unable to parse YAML document.');
+    throw FormatException('Unable to parse YAML document.');
   }
 }

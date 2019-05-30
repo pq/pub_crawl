@@ -4,7 +4,6 @@ import 'package:path/path.dart' as path;
 
 import 'package:pub_crawl/src/common.dart';
 
-
 // todo (pq): change this to cache, with list as a sub command and add clean
 
 class CacheCommand extends BaseCommand {
@@ -13,7 +12,6 @@ class CacheCommand extends BaseCommand {
     addSubcommand(CacheStatsCommand());
     addSubcommand(CacheCleanSubCommand());
   }
-
 
   @override
   String get description => 'cache commands.';
@@ -38,9 +36,7 @@ class ListSubCommand extends BaseCommand {
 
   @override
   String get name => 'cache';
-
 }
-
 
 class CacheCleanSubCommand extends BaseCommand {
   @override
@@ -64,9 +60,7 @@ class CacheCleanSubCommand extends BaseCommand {
 
     return Future.value();
   }
-
 }
-
 
 class CacheSizeCommand extends BaseCommand {
   @override
@@ -80,9 +74,7 @@ class CacheSizeCommand extends BaseCommand {
     print(cache.size());
     return Future.value();
   }
-
 }
-
 
 class CacheStatsCommand extends BaseCommand {
   @override
@@ -93,7 +85,6 @@ class CacheStatsCommand extends BaseCommand {
 
   @override
   Future run() {
-
     print('Total cache size: ${cache.size()}');
 
     var flutterPackageCount = 0;
@@ -138,5 +129,4 @@ class CacheStatsCommand extends BaseCommand {
 
     return Future.value();
   }
-
 }

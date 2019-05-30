@@ -129,7 +129,7 @@ class RemotePackage extends Package {
     final body = await getBody(url);
     try {
       var metricsData = jsonDecode(body);
-      package.metrics = new Metrics(metricsData);
+      package.metrics = Metrics(metricsData);
     } on FormatException catch (e) {
       print('unable to decode json from: $url');
       print(e);

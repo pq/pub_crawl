@@ -55,7 +55,7 @@ class AnalyzeCommand extends BaseCommand {
     final criteria = defaultAnalyzeCriteria;
     final packages = cache.list(matching: criteria);
 
-    final visitor = new PackageVisitor();
+    final visitor = PackageVisitor();
     for (final package in packages) {
       visitor.visit(cache.getSourceDir(package));
     }
@@ -88,7 +88,7 @@ class AnalyzeCommand extends BaseCommand {
   Future<List<ErrorsResult>> _analyzeFiles(
       ResourceProvider resourceProvider, List<String> analysisRoots) async {
     List<ErrorsResult> results = <ErrorsResult>[];
-    AnalysisContextCollection collection = new AnalysisContextCollection(
+    AnalysisContextCollection collection = AnalysisContextCollection(
         includedPaths: analysisRoots, resourceProvider: resourceProvider);
     for (AnalysisContext context in collection.contexts) {
       final relativePath =
@@ -139,13 +139,13 @@ class AnalyzeCommand extends BaseCommand {
     for (ErrorsResult result in results) {
       final errors = result.errors.where(showError).toList();
       if (errors.isNotEmpty) {
-        infos.add(new AnalysisErrorInfoImpl(errors, result.lineInfo));
+        infos.add(AnalysisErrorInfoImpl(errors, result.lineInfo));
       }
     }
-    AnalysisStats stats = new AnalysisStats();
+    AnalysisStats stats = AnalysisStats();
     CommandLineOptions options = CommandLineOptions.fromArgs(argResults);
     HumanErrorFormatter formatter =
-        new HumanErrorFormatter(io.stdout, options, stats);
+        HumanErrorFormatter(io.stdout, options, stats);
     formatter.formatErrors(infos);
     formatter.flush();
     stats.print();
@@ -272,9 +272,8 @@ abstract class ErrorFormatter {
   void formatErrors(List<AnalysisErrorInfo> errorInfos) {
     stats.unfilteredCount += errorInfos.length;
 
-    List<AnalysisError> errors = new List<AnalysisError>();
-    Map<AnalysisError, LineInfo> errorToLine =
-        new Map<AnalysisError, LineInfo>();
+    List<AnalysisError> errors = List<AnalysisError>();
+    Map<AnalysisError, LineInfo> errorToLine = Map<AnalysisError, LineInfo>();
     for (AnalysisErrorInfo errorInfo in errorInfos) {
       for (AnalysisError error in errorInfo.errors) {
         if (_computeSeverity(error) != null) {
@@ -390,13 +389,13 @@ class HumanErrorFormatter extends ErrorFormatter {
   AnsiLogger ansi;
 
   // This is a Set in order to de-dup CLI errors.
-  final Set<CLIError> batchedErrors = new Set();
+  final Set<CLIError> batchedErrors = Set();
 
   HumanErrorFormatter(
       StringSink out, CommandLineOptions options, AnalysisStats stats,
       {SeverityProcessor severityProcessor})
       : super(out, options, stats, severityProcessor: severityProcessor) {
-    ansi = new AnsiLogger(this.options.color);
+    ansi = AnsiLogger(this.options.color);
   }
 
   @override
@@ -472,7 +471,7 @@ class HumanErrorFormatter extends ErrorFormatter {
       sourcePath = _relative(source.fullName);
     }
 
-    batchedErrors.add(new CLIError(
+    batchedErrors.add(CLIError(
       severity: errorType,
       sourcePath: sourcePath,
       offset: error.offset,

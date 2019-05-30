@@ -10,7 +10,6 @@ typedef PackageIndexer = void Function(Package p, Cache index);
 Directory _cacheDir = Directory('third_party/cache');
 File _indexFile = File('third_party/index.json');
 
-
 // todo (pq): add a cache clean command (to remove old / duplicated libraries)
 
 class Index {
@@ -49,7 +48,6 @@ class Index {
     }
     return false;
   }
-
 }
 
 class Cache {
