@@ -11,7 +11,8 @@ final _client = http.Client();
 
 Future<String> getBody(String url) async => (await getResponse(url)).body;
 
-Future<http.Response> getResponse(String url) async => _client.get(url);
+Future<http.Response> getResponse(String url) async =>
+    _client.get(url, headers: const {'User-Agent': 'dart.pkg.pub_crawl'});
 
 int toInt(Object value) {
   if (value is int) {
