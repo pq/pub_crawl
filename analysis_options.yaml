@@ -17,7 +17,9 @@ linter:
      - throw_in_finally
      - type_init_formals
      - unnecessary_brace_in_string_interps
+     - unnecessary_const
      - unnecessary_lambdas
+     - unnecessary_new
      - unnecessary_statements
      - unnecessary_this
 
