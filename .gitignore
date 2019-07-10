@@ -12,11 +12,12 @@ doc/api/
 # Cache directories
 /third_party/cache
 /third_party/index.json
+/third_party/download
 
 # IDEA
-
 /pub_crawl.iml
 /.idea
 
 # macOS
-/.DS_Store
+.DS_Store
+
