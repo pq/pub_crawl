@@ -14,7 +14,9 @@ linter:
      - test_types_in_equals
      - throw_in_finally
      - unnecessary_brace_in_string_interps
+     - unnecessary_const
      - unnecessary_lambdas
+     - unnecessary_new
      - unnecessary_statements
      - unnecessary_this
 

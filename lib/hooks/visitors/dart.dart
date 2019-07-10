@@ -6,11 +6,8 @@ import 'package:analyzer/dart/ast/visitor.dart';
 ///
 /// (Important: do not move or rename.)
 class AstVisitor extends GeneralizingAstVisitor {
-
   /// Called on visit finish.
-  void onVisitFinish() {
-
-  }
+  void onVisitFinish() {}
 
 //  @override
 //  visitClassDeclaration(ClassDeclaration node) {
