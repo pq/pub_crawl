@@ -4,21 +4,19 @@
 include: package:pedantic/analysis_options.yaml
 
 linter:
-   rules:
-     - annotate_overrides
-     - camel_case_types
-     - empty_statements
-     - hash_and_equals
-     - non_constant_identifier_names
-     - prefer_expression_function_bodies
-     - test_types_in_equals
-     - throw_in_finally
-     - unnecessary_brace_in_string_interps
-     - unnecessary_const
-     - unnecessary_lambdas
-     - unnecessary_new
-     - unnecessary_statements
-     - unnecessary_this
+  rules:
+    - annotate_overrides
+    - camel_case_types
+    - empty_statements
+    - hash_and_equals
+    - non_constant_identifier_names
+    - prefer_expression_function_bodies
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_brace_in_string_interps
+    - unnecessary_lambdas
+    - unnecessary_statements
+    - unnecessary_this
 
 analyzer:
    exclude:
