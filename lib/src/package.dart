@@ -17,6 +17,8 @@ abstract class Package {
 
   String get version;
 
+  String get sdkConstraint;
+
   Directory get dir => null;
 
   Map<String, dynamic> get dependencies => pubspec['dependencies'];
@@ -109,6 +111,9 @@ class LocalPackage extends Package {
   String version;
 
   @override
+  String sdkConstraint;
+
+  @override
   double overallScore;
 
   @override
@@ -156,6 +161,12 @@ class RemotePackage extends Package {
 
   @override
   double get overallScore => metrics.overallScore;
+
+  @override
+  String get sdkConstraint {
+    final env = pubspec['environment'];
+    return env == null ? null : env['sdk'];
+  }
 }
 
 class Metrics {
