@@ -91,7 +91,7 @@ class FetchCommand extends BaseCommand {
 
         if (cache.isCached(package)) {
           if (verbose) {
-            print("Skipped package:${package.name} (already cached)");
+            print('Skipped package:${package.name} (already cached)');
             continue;
           }
         }
