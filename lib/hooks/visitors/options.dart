@@ -1,4 +1,4 @@
-import 'package:pub_crawl/src/common.dart';
+import '../../src/common.dart';
 
 /// Passed to all analyzed analysis options.
 ///

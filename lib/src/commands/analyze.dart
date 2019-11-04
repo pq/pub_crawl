@@ -15,12 +15,13 @@ import 'package:analyzer/src/generated/source.dart';
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:pub_crawl/hooks/criteria/analyze.dart';
-import 'package:pub_crawl/hooks/visitors/dart.dart';
-import 'package:pub_crawl/hooks/visitors/options.dart';
-import 'package:pub_crawl/hooks/visitors/package.dart';
-import 'package:pub_crawl/hooks/visitors/pubspec.dart';
-import 'package:pub_crawl/src/common.dart';
+
+import '../../hooks/criteria/analyze.dart';
+import '../../hooks/visitors/dart.dart';
+import '../../hooks/visitors/options.dart';
+import '../../hooks/visitors/package.dart';
+import '../../hooks/visitors/pubspec.dart';
+import '../common.dart';
 
 class AnalyzeCommand extends BaseCommand {
   // todo (pq): move this into cache object add it to .gitignore?

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:pub_crawl/src/common.dart';
-
 import 'package:yaml/yaml.dart' as yaml;
+
+import 'common.dart';
 
 abstract class Package {
   double get overallScore;

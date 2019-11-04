@@ -5,7 +5,8 @@ import 'package:analyzer/src/generated/engine.dart' show AnalysisOptionsImpl;
 import 'package:analyzer/src/lint/linter.dart';
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:linter/src/rules.dart';
-import 'package:pub_crawl/src/commands/analyze.dart';
+
+import 'analyze.dart';
 
 class LintCommand extends AnalyzeCommand {
   final List<LintRule> enabledRules = <LintRule>[];

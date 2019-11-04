@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'package:pub_crawl/src/common.dart';
+import '../common.dart';
 
 // todo (pq): change this to cache, with list as a sub command and add clean
 

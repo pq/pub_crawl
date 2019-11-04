@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
-import 'package:pub_crawl/src/common.dart';
-import 'package:pub_crawl/src/package.dart';
+import 'common.dart';
+import 'package.dart';
 
 typedef PackageIndexer = void Function(Package p, Cache index);
 

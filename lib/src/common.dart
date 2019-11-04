@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:pub_crawl/src/cache.dart';
-import 'package:pub_crawl/src/package.dart';
 import 'package:yaml/yaml.dart';
+
+import 'cache.dart';
+import 'package.dart';
 
 final _client = http.Client();
 

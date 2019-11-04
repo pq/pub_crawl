@@ -1,4 +1,4 @@
-import 'package:pub_crawl/src/common.dart';
+import '../common.dart';
 
 class CleanCommand extends BaseCommand {
   // todo (pq): move to 'delete' cache sub-command

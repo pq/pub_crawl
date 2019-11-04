@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:pub_crawl/hooks/criteria/fetch.dart';
-import 'package:pub_crawl/src/cache.dart';
-import 'package:pub_crawl/src/common.dart';
-import 'package:pub_crawl/src/package.dart';
+import '../../hooks/criteria/fetch.dart';
+import '../cache.dart';
+import '../common.dart';
+import '../package.dart';
 
 class FetchCommand extends BaseCommand {
   static const defaultFetchLimit = 10;
