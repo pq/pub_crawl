@@ -2,6 +2,8 @@
 
 A tool for fetching and exploring Dart packages published on [`pub`](https://pub.dartlang.org/).
 
+[![Build Status](https://travis-ci.org/pq/pub_crawl.svg)](https://travis-ci.org/pq/pub_crawl)
+
 ## Sample Applications
 
 The kinds of investigations `pub_crawl` was designed to support include ones like:
