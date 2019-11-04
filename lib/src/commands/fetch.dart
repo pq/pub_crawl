@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../../hooks/criteria/fetch.dart';
 import '../cache.dart';
 import '../common.dart';
+import '../filters.dart';
 import '../package.dart';
 
 class FetchCommand extends BaseCommand {
@@ -80,6 +81,13 @@ class FetchCommand extends BaseCommand {
         final package = await RemotePackage.init(packageData);
 
         ++count;
+
+        if (!isDart2(package.sdkConstraint)) {
+          if (verbose) {
+            print('Skipped package:${package.name} (not Dart2)');
+          }
+          continue;
+        }
 
         // Filter.
         final failedCriteria =
