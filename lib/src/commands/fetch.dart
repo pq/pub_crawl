@@ -10,12 +10,6 @@ import '../package.dart';
 class FetchCommand extends BaseCommand {
   static const defaultFetchLimit = 10;
 
-  @override
-  String get description => 'fetch packages.';
-
-  @override
-  String get name => 'fetch';
-
   FetchCommand() {
     argParser.addOption('criteria', abbr: 'c', valueHelp: 'crit_1,..,crit_n');
     argParser.addOption('max',
@@ -33,7 +27,13 @@ class FetchCommand extends BaseCommand {
         help: 'show verbose output.', negatable: false);
   }
 
+  @override
+  String get description => 'fetch packages.';
+
   bool get install => argResults['install'];
+
+  @override
+  String get name => 'fetch';
 
   @override
   Future run() async {

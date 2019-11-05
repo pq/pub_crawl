@@ -5,64 +5,6 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import 'common.dart';
 
-abstract class Package {
-  double get overallScore;
-  double get popularityScore;
-  double get maintenanceScore;
-  double get healthScore;
-
-  /// Cache-relative path to local package source.
-  String get sourcePath => '$name-$version';
-
-  String get name;
-
-  String get archiveUrl;
-
-  String get version;
-
-  String get sdkConstraint;
-
-  Directory get dir => null;
-
-  Map<String, dynamic> get dependencies => pubspec['dependencies'];
-
-  Map<String, dynamic> get pubspec;
-
-  String get repository;
-
-  Package();
-
-  factory Package.fromData(String name, dynamic jsonData) {
-    final packageData = jsonData[name];
-    if (packageData == null) {
-      return null;
-    }
-
-    final package = LocalPackage();
-    package.name = name;
-    package.version = packageData['version'];
-    package.overallScore = packageData['score'];
-    package.popularityScore = packageData['popularity'];
-    package.maintenanceScore = packageData['maintenance'];
-    package.healthScore = packageData['health'];
-    package.dir = Directory('third_party/cache/${packageData['sourcePath']}');
-    return package;
-  }
-
-  void addToJsonData(dynamic jsonData) {
-    jsonData[name] = {
-      'version': version,
-      'score': overallScore,
-      'popularity': popularityScore,
-      'maintenance': maintenanceScore,
-      'health': healthScore,
-      'sourcePath': sourcePath,
-    };
-  }
-
-  bool isFlutterPackage() => dependencies?.containsKey('flutter') == true;
-}
-
 class LocalPackage extends Package {
   @override
   String archiveUrl;
@@ -76,6 +18,25 @@ class LocalPackage extends Package {
   @override
   String name;
 
+  @override
+  String repository;
+
+  @override
+  String version;
+
+  @override
+  String sdkConstraint;
+
+  @override
+  double overallScore;
+
+  @override
+  double popularityScore;
+
+  @override
+  double maintenanceScore;
+  @override
+  double healthScore;
   @override
   Map<String, dynamic> get dependencies {
     if (_pubspec == null) {
@@ -114,25 +75,79 @@ class LocalPackage extends Package {
   }
 
   @override
-  String repository;
-
-  @override
-  String version;
-
-  @override
-  String sdkConstraint;
-
-  @override
-  double overallScore;
-  @override
-  double popularityScore;
-  @override
-  double maintenanceScore;
-  @override
-  double healthScore;
-
-  @override
   String toString() => '$name-$version';
+}
+
+class Metrics {
+  final _data;
+
+  Metrics(this._data);
+
+  double get health => _getScorecardMetric('healthScore');
+
+  double get maintenance => _getScorecardMetric('maintenanceScore');
+  double get overall => _getScorecardMetric('overallScore');
+  double get popularity => _getScorecardMetric('popularityScore');
+  double _getScorecardMetric(String name) =>
+      _data['scorecard'] != null ? _data['scorecard'][name] : null;
+}
+
+abstract class Package {
+  Package();
+  factory Package.fromData(String name, dynamic jsonData) {
+    final packageData = jsonData[name];
+    if (packageData == null) {
+      return null;
+    }
+
+    final package = LocalPackage();
+    package.name = name;
+    package.version = packageData['version'];
+    package.overallScore = packageData['score'];
+    package.popularityScore = packageData['popularity'];
+    package.maintenanceScore = packageData['maintenance'];
+    package.healthScore = packageData['health'];
+    package.dir = Directory('third_party/cache/${packageData['sourcePath']}');
+    return package;
+  }
+  String get archiveUrl;
+  Map<String, dynamic> get dependencies => pubspec['dependencies'];
+
+  Directory get dir => null;
+
+  double get healthScore;
+
+  double get maintenanceScore;
+
+  String get name;
+
+  double get overallScore;
+
+  double get popularityScore;
+
+  Map<String, dynamic> get pubspec;
+
+  String get repository;
+
+  String get sdkConstraint;
+
+  /// Cache-relative path to local package source.
+  String get sourcePath => '$name-$version';
+
+  String get version;
+
+  void addToJsonData(dynamic jsonData) {
+    jsonData[name] = {
+      'version': version,
+      'score': overallScore,
+      'popularity': popularityScore,
+      'maintenance': maintenanceScore,
+      'health': healthScore,
+      'sourcePath': sourcePath,
+    };
+  }
+
+  bool isFlutterPackage() => dependencies?.containsKey('flutter') == true;
 }
 
 class RemotePackage extends Package {
@@ -141,6 +156,39 @@ class RemotePackage extends Package {
   Metrics metrics;
 
   RemotePackage._(this._data);
+
+  @override
+  String get archiveUrl => _data['latest']['archive_url'];
+
+  @override
+  double get healthScore => metrics.health;
+
+  @override
+  double get maintenanceScore => metrics.maintenance;
+
+  @override
+  String get name => _data['name'];
+
+  @override
+  double get overallScore => metrics.overall;
+
+  @override
+  double get popularityScore => metrics.popularity;
+
+  @override
+  Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
+
+  @override
+  String get repository => pubspec['repository'];
+
+  @override
+  String get sdkConstraint {
+    final env = pubspec['environment'];
+    return env == null ? null : env['sdk'];
+  }
+
+  @override
+  String get version => _data['latest']['version'];
 
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
@@ -158,51 +206,4 @@ class RemotePackage extends Package {
     }
     return package;
   }
-
-  @override
-  String get name => _data['name'];
-
-  @override
-  String get archiveUrl => _data['latest']['archive_url'];
-
-  @override
-  String get version => _data['latest']['version'];
-
-  @override
-  Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
-
-  @override
-  String get repository => pubspec['repository'];
-
-  @override
-  double get overallScore => metrics.overall;
-
-  @override
-  double get popularityScore => metrics.popularity;
-
-  @override
-  double get maintenanceScore => metrics.maintenance;
-
-  @override
-  double get healthScore => metrics.health;
-
-  @override
-  String get sdkConstraint {
-    final env = pubspec['environment'];
-    return env == null ? null : env['sdk'];
-  }
-}
-
-class Metrics {
-  final _data;
-
-  Metrics(this._data);
-
-  double _getScorecardMetric(String name) =>
-      _data['scorecard'] != null ? _data['scorecard'][name] : null;
-
-  double get overall => _getScorecardMetric('overallScore');
-  double get popularity => _getScorecardMetric('popularityScore');
-  double get maintenance => _getScorecardMetric('maintenanceScore');
-  double get health => _getScorecardMetric('healthScore');
 }
