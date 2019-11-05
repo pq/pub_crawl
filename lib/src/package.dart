@@ -7,6 +7,9 @@ import 'common.dart';
 
 abstract class Package {
   double get overallScore;
+  double get popularityScore;
+  double get maintenanceScore;
+  double get healthScore;
 
   /// Cache-relative path to local package source.
   String get sourcePath => '$name-$version';
@@ -39,6 +42,9 @@ abstract class Package {
     package.name = name;
     package.version = packageData['version'];
     package.overallScore = packageData['score'];
+    package.popularityScore = packageData['popularity'];
+    package.maintenanceScore = packageData['maintenance'];
+    package.healthScore = packageData['health'];
     package.dir = Directory('third_party/cache/${packageData['sourcePath']}');
     return package;
   }
@@ -47,6 +53,9 @@ abstract class Package {
     jsonData[name] = {
       'version': version,
       'score': overallScore,
+      'popularity': popularityScore,
+      'maintenance': maintenanceScore,
+      'health': healthScore,
       'sourcePath': sourcePath,
     };
   }
@@ -115,6 +124,12 @@ class LocalPackage extends Package {
 
   @override
   double overallScore;
+  @override
+  double popularityScore;
+  @override
+  double maintenanceScore;
+  @override
+  double healthScore;
 
   @override
   String toString() => '$name-$version';
@@ -160,7 +175,16 @@ class RemotePackage extends Package {
   String get repository => pubspec['repository'];
 
   @override
-  double get overallScore => metrics.overallScore;
+  double get overallScore => metrics.overall;
+
+  @override
+  double get popularityScore => metrics.popularity;
+
+  @override
+  double get maintenanceScore => metrics.maintenance;
+
+  @override
+  double get healthScore => metrics.health;
 
   @override
   String get sdkConstraint {
@@ -174,8 +198,10 @@ class Metrics {
 
   Metrics(this._data);
 
-  double get overallScore {
-    var scorecard = _data['scorecard'];
-    return scorecard != null ? scorecard['overallScore'] : null;
-  }
+  double _getScorecardMetric(String name) => _data['scorecard'] != null ? _data['scorecard'][name] : null;
+
+  double get overall => _getScorecardMetric('overallScore');
+  double get popularity => _getScorecardMetric('popularityScore');
+  double get maintenance => _getScorecardMetric('maintenanceScore');
+  double get health => _getScorecardMetric('healthScore');
 }
