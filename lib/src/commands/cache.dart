@@ -6,38 +6,6 @@ import '../common.dart';
 
 // todo (pq): change this to cache, with list as a sub command and add clean
 
-class CacheCommand extends BaseCommand {
-  CacheCommand() {
-    addSubcommand(ListSubCommand());
-    addSubcommand(CacheStatsCommand());
-    addSubcommand(CacheCleanSubCommand());
-  }
-
-  @override
-  String get description => 'cache commands.';
-
-  @override
-  String get name => 'cache';
-
-//  @override
-//  Future run() {
-//    print(cache.size());
-//    return Future.value();
-//  }
-}
-
-class ListSubCommand extends BaseCommand {
-  ListSubCommand() {
-    addSubcommand(CacheSizeCommand());
-  }
-
-  @override
-  String get description => 'package cache commands';
-
-  @override
-  String get name => 'cache';
-}
-
 class CacheCleanSubCommand extends BaseCommand {
   @override
   String get description => 'clean cache (remove stale packages)';
@@ -60,6 +28,26 @@ class CacheCleanSubCommand extends BaseCommand {
 
     return Future.value();
   }
+}
+
+class CacheCommand extends BaseCommand {
+  CacheCommand() {
+    addSubcommand(ListSubCommand());
+    addSubcommand(CacheStatsCommand());
+    addSubcommand(CacheCleanSubCommand());
+  }
+
+  @override
+  String get description => 'cache commands.';
+
+  @override
+  String get name => 'cache';
+
+//  @override
+//  Future run() {
+//    print(cache.size());
+//    return Future.value();
+//  }
 }
 
 class CacheSizeCommand extends BaseCommand {
@@ -129,4 +117,16 @@ class CacheStatsCommand extends BaseCommand {
 
     return Future.value();
   }
+}
+
+class ListSubCommand extends BaseCommand {
+  ListSubCommand() {
+    addSubcommand(CacheSizeCommand());
+  }
+
+  @override
+  String get description => 'package cache commands';
+
+  @override
+  String get name => 'cache';
 }
