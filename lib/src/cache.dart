@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -81,7 +82,20 @@ class Cache {
         File('${sourceDir.path}/.packages').existsSync();
   }
 
-  Future<ProcessResult> installDependencies(Package package) async {
+  Future<Process> raceProcess(Future<Process> futureProcess, int timeout) {
+    if (timeout <= 0) {
+      // Nothing to do here
+      return futureProcess;
+    }
+    // Wrap the futureProcess in timeout, and return it when it's ready (or throw if timeout exceeded!)
+    return futureProcess.then((Process p) =>
+      p.exitCode.timeout(Duration(seconds: timeout), onTimeout: () {
+        Process.killPid(p.pid);
+        throw Exception('Process with PID ${p.pid} took longer than ${timeout}s to complete. Killed.');
+      }).then((int exitCode) => p));
+  }
+
+  Future<Process> installDependencies(Package package, {int timeout}) async {
     final sourceDir = getSourceDir(package);
     final sourcePath = sourceDir.path;
     if (!sourceDir.existsSync()) {
@@ -91,13 +105,14 @@ class Cache {
     }
 
     if (package.dependencies?.containsKey('flutter') == true) {
-      return Process.run('flutter', ['packages', 'get'],
-          workingDirectory: sourcePath);
+      return raceProcess(Process.start('flutter', ['pub', 'get'],
+          workingDirectory: sourcePath), timeout);
     }
 
     //TODO: recurse and run pub get in example dirs.
     print('Running "pub get" in ${path.basename(sourcePath)}');
-    return Process.run('pub', ['get'], workingDirectory: sourcePath);
+    return raceProcess(Process.start('pub', ['get'],
+        workingDirectory: sourcePath), timeout);
   }
 
   Future<bool> _download(Package package) async {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import '../../hooks/criteria/fetch.dart';
 import '../cache.dart';
@@ -16,23 +17,26 @@ class FetchCommand extends BaseCommand {
   String get name => 'fetch';
 
   FetchCommand() {
-    argParser.addOption('max', abbr: 'm', valueHelp: 'packages');
     argParser.addOption('criteria', abbr: 'c', valueHelp: 'crit_1,..,crit_n');
-    argParser.addFlag('no-install', help: 'do not install dependencies.');
-    argParser.addFlag('verbose', help: 'show verbose output.');
+    argParser.addOption('max', abbr: 'm', valueHelp: 'packages', help: 'number of packages to download.', defaultsTo: defaultFetchLimit.toString());
+    argParser.addOption('timeout', valueHelp: 'seconds', help: 'time allotted for the download of each package.', defaultsTo: "disabled");
+    argParser.addFlag('install', help: 'install dependencies.', defaultsTo: true);
+    argParser.addFlag('verbose', help: 'show verbose output.', negatable: false);
   }
 
-  bool get install => !argResults['no-install'];
+  bool get install => argResults['install'];
 
   @override
   Future run() async {
     final maxFetch = toInt(argResults['max'] ?? defaultFetchLimit);
+    final timeout = toInt(argResults['timeout'] ?? -1);
+
     final criteria =
         Criteria.fromArgs(argResults['criteria']) ?? defaultFetchCriteria;
 
     int skipCount = 0;
     var packages = await _listPackages(criteria, maxFetch, onSkip: (p, c) {
-      print('Skipped package:${p.name} (${c.onFail(p)})');
+      print('Skipped package: ${p.name} (${c.onFail(p)})');
       ++skipCount;
     });
 
@@ -43,11 +47,17 @@ class FetchCommand extends BaseCommand {
       }
 
       if (install && !cache.hasDependenciesInstalled(package)) {
-        print('Installing dependencies...');
-        var result = await cache.installDependencies(package);
-        if (result != null) {
-          print(result.stdout);
-          print(result.stderr);
+        print('Installing dependencies for ${package.name}');
+        try {
+          if (verbose) {
+            await cache.installDependencies(package, timeout: timeout)
+              ..stdout.listen(io.stdout.add)
+              ..stderr.listen(io.stderr.add);
+          } else {
+            await cache.installDependencies(package, timeout: timeout);
+          }
+        } catch (e) {
+          print(e);
         }
       }
     };
@@ -111,7 +121,6 @@ class FetchCommand extends BaseCommand {
           break;
         }
       }
-      print(count);
       packagePage = packageBody['next_url'];
     }
     print('$count packages processed');
@@ -121,7 +130,7 @@ class FetchCommand extends BaseCommand {
       print('(Max processed package count of $maxCount reached.)');
     }
 
-    print(count);
+    print("---");
 
     return packages;
   }
