@@ -18,10 +18,19 @@ class FetchCommand extends BaseCommand {
 
   FetchCommand() {
     argParser.addOption('criteria', abbr: 'c', valueHelp: 'crit_1,..,crit_n');
-    argParser.addOption('max', abbr: 'm', valueHelp: 'packages', help: 'number of packages to download.', defaultsTo: defaultFetchLimit.toString());
-    argParser.addOption('timeout', valueHelp: 'seconds', help: 'time allotted for the download of each package.', defaultsTo: "disabled");
-    argParser.addFlag('install', help: 'install dependencies.', defaultsTo: true);
-    argParser.addFlag('verbose', help: 'show verbose output.', negatable: false);
+    argParser.addOption('max',
+        abbr: 'm',
+        valueHelp: 'packages',
+        help: 'number of packages to download.',
+        defaultsTo: defaultFetchLimit.toString());
+    argParser.addOption('timeout',
+        valueHelp: 'seconds',
+        help: 'time allotted for the download of each package.',
+        defaultsTo: 'disabled');
+    argParser.addFlag('install',
+        help: 'install dependencies.', defaultsTo: true);
+    argParser.addFlag('verbose',
+        help: 'show verbose output.', negatable: false);
   }
 
   bool get install => argResults['install'];
@@ -130,7 +139,7 @@ class FetchCommand extends BaseCommand {
       print('(Max processed package count of $maxCount reached.)');
     }
 
-    print("---");
+    print('---');
 
     return packages;
   }

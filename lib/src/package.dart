@@ -198,7 +198,8 @@ class Metrics {
 
   Metrics(this._data);
 
-  double _getScorecardMetric(String name) => _data['scorecard'] != null ? _data['scorecard'][name] : null;
+  double _getScorecardMetric(String name) =>
+      _data['scorecard'] != null ? _data['scorecard'][name] : null;
 
   double get overall => _getScorecardMetric('overallScore');
   double get popularity => _getScorecardMetric('popularityScore');

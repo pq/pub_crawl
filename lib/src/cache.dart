@@ -89,10 +89,11 @@ class Cache {
     }
     // Wrap the futureProcess in timeout, and return it when it's ready (or throw if timeout exceeded!)
     return futureProcess.then((Process p) =>
-      p.exitCode.timeout(Duration(seconds: timeout), onTimeout: () {
-        Process.killPid(p.pid);
-        throw Exception('Process with PID ${p.pid} took longer than ${timeout}s to complete. Killed.');
-      }).then((int exitCode) => p));
+        p.exitCode.timeout(Duration(seconds: timeout), onTimeout: () {
+          Process.killPid(p.pid);
+          throw Exception(
+              'Process with PID ${p.pid} took longer than ${timeout}s to complete. Killed.');
+        }).then((int exitCode) => p));
   }
 
   Future<Process> installDependencies(Package package, {int timeout}) async {
@@ -105,14 +106,16 @@ class Cache {
     }
 
     if (package.dependencies?.containsKey('flutter') == true) {
-      return raceProcess(Process.start('flutter', ['pub', 'get'],
-          workingDirectory: sourcePath), timeout);
+      return raceProcess(
+          Process.start('flutter', ['pub', 'get'],
+              workingDirectory: sourcePath),
+          timeout);
     }
 
     //TODO: recurse and run pub get in example dirs.
     print('Running "pub get" in ${path.basename(sourcePath)}');
-    return raceProcess(Process.start('pub', ['get'],
-        workingDirectory: sourcePath), timeout);
+    return raceProcess(
+        Process.start('pub', ['get'], workingDirectory: sourcePath), timeout);
   }
 
   Future<bool> _download(Package package) async {
