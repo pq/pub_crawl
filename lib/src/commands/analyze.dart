@@ -73,8 +73,7 @@ class AnalyzeCommand extends BaseCommand {
       return;
     }
     ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
-    List<ErrorsResult> results =
-        await _analyzeFiles(resourceProvider, sourceDirs);
+    final results = await _analyzeFiles(resourceProvider, sourceDirs);
     print('Finished.');
     if (showErrors) {
       _printAnalysisResults(results);
@@ -88,10 +87,10 @@ class AnalyzeCommand extends BaseCommand {
 
   Future<List<ErrorsResult>> _analyzeFiles(
       ResourceProvider resourceProvider, List<String> analysisRoots) async {
-    List<ErrorsResult> results = <ErrorsResult>[];
-    AnalysisContextCollection collection = AnalysisContextCollection(
+    final results = <ErrorsResult>[];
+    final collection = AnalysisContextCollection(
         includedPaths: analysisRoots, resourceProvider: resourceProvider);
-    for (AnalysisContext context in collection.contexts) {
+    for (var context in collection.contexts) {
       final relativePath =
           context.contextRoot.root.path.split('$cachePath/')[1];
 
@@ -99,19 +98,17 @@ class AnalyzeCommand extends BaseCommand {
 
       preAnalyze(context);
 
-      for (String filePath in context.contextRoot.analyzedFiles()) {
+      for (var filePath in context.contextRoot.analyzedFiles()) {
         if (AnalysisEngine.isDartFileName(filePath)) {
           if (showErrors) {
-            ErrorsResult result =
-                await context.currentSession.getErrors(filePath);
+            final result = await context.currentSession.getErrors(filePath);
             if (result.errors.isNotEmpty) {
               results.add(result);
             }
           }
 
           // todo (pq): move this up and collect errors from the resolved result.
-          ResolvedUnitResult result =
-              await context.currentSession.getResolvedUnit(filePath);
+          final result = await context.currentSession.getResolvedUnit(filePath);
 
           // AST Visitor callback.
           result.unit.accept(visitor);
@@ -136,17 +133,16 @@ class AnalyzeCommand extends BaseCommand {
   }
 
   void _printAnalysisResults(List<ErrorsResult> results) {
-    List<AnalysisErrorInfo> infos = <AnalysisErrorInfo>[];
-    for (ErrorsResult result in results) {
+    final infos = <AnalysisErrorInfo>[];
+    for (var result in results) {
       final errors = result.errors.where(showError).toList();
       if (errors.isNotEmpty) {
         infos.add(AnalysisErrorInfoImpl(errors, result.lineInfo));
       }
     }
-    AnalysisStats stats = AnalysisStats();
-    CommandLineOptions options = CommandLineOptions.fromArgs(argResults);
-    HumanErrorFormatter formatter =
-        HumanErrorFormatter(io.stdout, options, stats);
+    final stats = AnalysisStats();
+    final options = CommandLineOptions.fromArgs(argResults);
+    final formatter = HumanErrorFormatter(io.stdout, options, stats);
     formatter.formatErrors(infos);
     formatter.flush();
     stats.print();
@@ -198,11 +194,11 @@ class AnalysisStats {
   /// Print statistics to [out].
   void print([StringSink out]) {
     out ??= io.stdout;
-    bool hasErrors = errorCount != 0;
-    bool hasWarns = warnCount != 0;
-    bool hasHints = hintCount != 0;
-    bool hasLints = lintCount != 0;
-    bool hasContent = false;
+    final hasErrors = errorCount != 0;
+    final hasWarns = warnCount != 0;
+    final hasHints = hintCount != 0;
+    final hasLints = lintCount != 0;
+    var hasContent = false;
     if (hasErrors) {
       out.write(errorCount);
       out.write(' ');
@@ -273,10 +269,10 @@ abstract class ErrorFormatter {
   void formatErrors(List<AnalysisErrorInfo> errorInfos) {
     stats.unfilteredCount += errorInfos.length;
 
-    List<AnalysisError> errors = List<AnalysisError>();
-    Map<AnalysisError, LineInfo> errorToLine = Map<AnalysisError, LineInfo>();
-    for (AnalysisErrorInfo errorInfo in errorInfos) {
-      for (AnalysisError error in errorInfo.errors) {
+    final errors = List<AnalysisError>();
+    final errorToLine = Map<AnalysisError, LineInfo>();
+    for (var errorInfo in errorInfos) {
+      for (var error in errorInfo.errors) {
         if (_computeSeverity(error) != null) {
           errors.add(error);
           errorToLine[error] = errorInfo.lineInfo;
@@ -284,7 +280,7 @@ abstract class ErrorFormatter {
       }
     }
 
-    for (AnalysisError error in errors) {
+    for (var error in errors) {
       formatError(errorToLine, error);
     }
   }
@@ -360,7 +356,7 @@ class CLIError implements Comparable<CLIError> {
   @override
   int compareTo(CLIError other) {
     // severity
-    int compare = _severityCompare[other.severity] - _severityCompare[severity];
+    var compare = _severityCompare[other.severity] - _severityCompare[severity];
     if (compare != 0) return compare;
 
     // path
@@ -402,10 +398,10 @@ class HumanErrorFormatter extends ErrorFormatter {
   @override
   void flush() {
     // sort
-    List<CLIError> sortedErrors = batchedErrors.toList()..sort();
+    final sortedErrors = batchedErrors.toList()..sort();
 
     // print
-    for (CLIError error in sortedErrors) {
+    for (var error in sortedErrors) {
       if (error.isError) {
         stats.errorCount++;
       } else if (error.isWarning) {
@@ -417,7 +413,7 @@ class HumanErrorFormatter extends ErrorFormatter {
       }
 
       // warning • 'foo' is not a bar at lib/foo.dart:1:2 • foo_warning
-      String issueColor = (error.isError || error.isWarning) ? ansi.red : '';
+      final issueColor = (error.isError || error.isWarning) ? ansi.red : '';
       out.write('  $issueColor${error.severity}${ansi.none} '
           '${ansi.bullet} ${ansi.bold}${error.message}${ansi.none} ');
       out.write('at ${error.sourcePath}');
@@ -439,13 +435,13 @@ class HumanErrorFormatter extends ErrorFormatter {
   @override
   void formatError(
       Map<AnalysisError, LineInfo> errorToLine, AnalysisError error) {
-    Source source = error.source;
+    final source = error.source;
     var location = errorToLine[error].getLocation(error.offset);
 
-    ErrorSeverity severity = _severityProcessor(error);
+    final severity = _severityProcessor(error);
 
     // Get display name; translate INFOs into LINTS and HINTS.
-    String errorType = severity.displayName;
+    var errorType = severity.displayName;
     if (severity == ErrorSeverity.INFO) {
       if (error.errorCode.type == ErrorType.HINT ||
           error.errorCode.type == ErrorType.LINT) {
@@ -454,7 +450,7 @@ class HumanErrorFormatter extends ErrorFormatter {
     }
 
     // warning • 'foo' is not a bar at lib/foo.dart:1:2 • foo_warning
-    String message = error.message;
+    var message = error.message;
     // Remove any terminating '.' from the end of the message.
     if (message.endsWith('.')) {
       message = message.substring(0, message.length - 1);

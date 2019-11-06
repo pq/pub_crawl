@@ -135,7 +135,7 @@ YamlMap _readYamlFromString(String optionsSource) {
     return YamlMap();
   }
   try {
-    YamlNode doc = loadYamlNode(optionsSource);
+    final doc = loadYamlNode(optionsSource);
     if (doc is YamlMap) {
       return doc;
     }

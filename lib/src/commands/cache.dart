@@ -77,9 +77,9 @@ class CacheStatsCommand extends BaseCommand {
 
     var flutterPackageCount = 0;
     var flutterPluginCount = 0;
-    List<String> packagesWithBoth = <String>[];
-    List<String> packagesWithJustAndroid = <String>[];
-    List<String> packagesWithJustIOs = <String>[];
+    final packagesWithBoth = <String>[];
+    final packagesWithJustAndroid = <String>[];
+    final packagesWithJustIOs = <String>[];
 
     for (var package in cache.list()) {
       if (package.isFlutterPackage()) {

@@ -70,7 +70,7 @@ class Cache {
   bool isCached(Package package) => getSourceDir(package).existsSync();
 
   Future cache(Package package) async {
-    bool cached = await _download(package);
+    final cached = await _download(package);
     if (cached) {
       index.add(package);
     }

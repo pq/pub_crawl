@@ -43,7 +43,7 @@ class FetchCommand extends BaseCommand {
     final criteria =
         Criteria.fromArgs(argResults['criteria']) ?? defaultFetchCriteria;
 
-    int skipCount = 0;
+    var skipCount = 0;
     var packages = await _listPackages(criteria, maxFetch, onSkip: (p, c) {
       print('Skipped package: ${p.name} (${c.onFail(p)})');
       ++skipCount;
