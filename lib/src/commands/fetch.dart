@@ -87,7 +87,7 @@ class FetchCommand extends BaseCommand {
   Future<List<Package>> _listPackages(
     List<Criteria> criteria,
     int maxCount, {
-    void onSkip(Package package, Criteria criteria),
+    void Function(Package package, Criteria criteria) onSkip,
   }) async {
     var count = 0;
     // todo (pq): https

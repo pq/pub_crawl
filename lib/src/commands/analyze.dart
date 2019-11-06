@@ -161,7 +161,7 @@ final Map<String, int> _severityCompare = {
   'hint': 1,
 };
 
-String _pluralize(String word, int count) => count == 1 ? word : word + 's';
+String _pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
 /// Given an absolute path, return a relative path if the file is contained in
 /// the current directory; return the original path otherwise.
@@ -269,8 +269,8 @@ abstract class ErrorFormatter {
   void formatErrors(List<AnalysisErrorInfo> errorInfos) {
     stats.unfilteredCount += errorInfos.length;
 
-    final errors = List<AnalysisError>();
-    final errorToLine = Map<AnalysisError, LineInfo>();
+    final errors = <AnalysisError>[];
+    final errorToLine = <AnalysisError, LineInfo>{};
     for (var errorInfo in errorInfos) {
       for (var error in errorInfo.errors) {
         if (_computeSeverity(error) != null) {
@@ -386,7 +386,7 @@ class HumanErrorFormatter extends ErrorFormatter {
   AnsiLogger ansi;
 
   // This is a Set in order to de-dup CLI errors.
-  final Set<CLIError> batchedErrors = Set();
+  final Set<CLIError> batchedErrors = {};
 
   HumanErrorFormatter(
       StringSink out, CommandLineOptions options, AnalysisStats stats,
