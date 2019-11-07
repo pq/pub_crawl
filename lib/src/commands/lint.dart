@@ -2,7 +2,8 @@ import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/src/dart/error/lint_codes.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/engine.dart' // ignore: implementation_imports
-    show AnalysisOptionsImpl;
+    show
+        AnalysisOptionsImpl;
 import 'package:analyzer/src/lint/linter.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/lint/registry.dart'; // ignore: implementation_imports
 import 'package:linter/src/rules.dart'; // ignore: implementation_imports
