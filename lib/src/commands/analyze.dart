@@ -10,7 +10,10 @@ import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/source/line_info.dart';
 import 'package:analyzer/src/generated/engine.dart' // ignore: implementation_imports
-    show AnalysisEngine, AnalysisErrorInfo, AnalysisErrorInfoImpl;
+    show
+        AnalysisEngine,
+        AnalysisErrorInfo,
+        AnalysisErrorInfoImpl;
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
