@@ -72,10 +72,10 @@ class FetchCommand extends BaseCommand {
     };
 
     for (var package in packages) {
-      await cache.process(package);
+      cache.process(package);
     }
 
-    await cache.index.write();
+    cache.index.write();
 
     if (skipCount > 0) {
       print('($skipCount packages skipped)');

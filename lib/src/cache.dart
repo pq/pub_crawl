@@ -63,7 +63,7 @@ class Cache {
 
   void process(Package package) async {
     if (onProcess != null) {
-      await onProcess(package, this);
+      onProcess(package, this);
     }
   }
 

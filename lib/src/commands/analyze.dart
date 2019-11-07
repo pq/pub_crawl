@@ -9,9 +9,9 @@ import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/source/line_info.dart';
-import 'package:analyzer/src/generated/engine.dart'
+import 'package:analyzer/src/generated/engine.dart' // ignore: implementation_imports
     show AnalysisEngine, AnalysisErrorInfo, AnalysisErrorInfoImpl;
-import 'package:analyzer/src/generated/source.dart';
+import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -174,11 +174,10 @@ ErrorSeverity _severityIdentity(AnalysisError error) =>
 
 /// Returns desired severity for the given [error] (or `null` if it's to be
 /// suppressed).
-typedef ErrorSeverity SeverityProcessor(AnalysisError error);
+typedef SeverityProcessor = ErrorSeverity Function(AnalysisError error);
 
 /// Analysis statistics counter.
 class AnalysisStats {
-  /// The total number of diagnostics sent to [formatErrors].
   int unfilteredCount = 0;
 
   int errorCount = 0;
