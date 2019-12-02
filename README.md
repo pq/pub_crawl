@@ -92,5 +92,16 @@ class AstVisitor extends GeneralizingAstVisitor {
 
 More examples live in the [example](example) directory. 
 
+## Related Work
 
+See also [`package:surveyor`][surveyor], which explores a variation on pub_crawl hooks to allow for custom "surveys" of Dart sources.
+
+## Features and bugs
+
+Please file feature requests, bugs and any feedback in the [issue tracker][tracker].
+
+Thanks!
+
+[tracker]: https://github.com/pq/pub_crawl/issues
+[surveyor]: https://github.com/pq/surveyor
 [pub scoring docs]: https://pub.dartlang.org/help#scoring
