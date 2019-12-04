@@ -207,7 +207,7 @@ class RemotePackage extends Package {
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
     final url =
-            'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
+        'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
     final body = await getBody(url);
     try {
       var metricsData = jsonDecode(body);
