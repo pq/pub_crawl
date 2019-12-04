@@ -4,6 +4,8 @@ A tool for fetching and exploring Dart packages published on [`pub`](https://pub
 
 [![Build Status](https://travis-ci.org/pq/pub_crawl.svg)](https://travis-ci.org/pq/pub_crawl)
 
+**Disclaimer:** This is not an officially supported Google product.
+
 ## Sample Applications
 
 The kinds of investigations `pub_crawl` was designed to support include ones like:
