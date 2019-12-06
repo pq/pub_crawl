@@ -30,7 +30,7 @@ class AstVisitor extends GeneralizingAstVisitor {
   }
 
   @override
-  visitMethodDeclaration(MethodDeclaration node) {
+  void visitMethodDeclaration(MethodDeclaration node) {
     if (node.name.name == 'debugFillProperties') {
       ++count;
     }
