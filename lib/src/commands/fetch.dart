@@ -34,7 +34,7 @@ class FetchCommand extends BaseCommand {
     argParser.addOption('timeout',
         valueHelp: 'seconds',
         help: 'time allotted for the download of each package.',
-        defaultsTo: 'disabled');
+        defaultsTo: '-1');
     argParser.addFlag('install',
         help: 'install dependencies.', defaultsTo: true);
     argParser.addFlag('verbose',

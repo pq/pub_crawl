@@ -121,7 +121,8 @@ class Cache {
 
     if (package.dependencies?.containsKey('flutter') == true) {
       return raceProcess(
-          Process.start('flutter', ['pub', 'get'],
+          Process.start(
+              'flutter', ['packages', 'pub', 'get', '--no-precompile'],
               workingDirectory: sourcePath),
           timeout);
     }
@@ -129,7 +130,9 @@ class Cache {
     //TODO: recurse and run pub get in example dirs.
     print('Running "pub get" in ${path.basename(sourcePath)}');
     return raceProcess(
-        Process.start('pub', ['get'], workingDirectory: sourcePath), timeout);
+        Process.start('pub', ['get', '--no-precompile'],
+            workingDirectory: sourcePath),
+        timeout);
   }
 
   Future<bool> _download(Package package) async {
