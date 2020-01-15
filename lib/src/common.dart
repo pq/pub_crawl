@@ -83,21 +83,37 @@ class Criteria {
   }
 
   factory Criteria.forName(String name) {
+    String value;
+    if (name.contains(':')) {
+      final nameValue = name.split(':');
+      name = nameValue[0];
+      value = nameValue[1];
+    }
+
     switch (name) {
       case 'flutter':
+        return Criteria.forName('depends_on:flutter');
+      case 'depends_on':
+        if (value == null) {
+          throw Exception('Argument required for "$name"');
+        }
         return Criteria(
-          matches: (p) => p.dependencies?.containsKey('flutter') == true,
-          onFail: (_) => 'does not use flutter',
+          matches: (p) => p.dependencies?.containsKey(value) == true,
+          onFail: (_) => 'does not use $value',
+        );
+      case 'min_score':
+        if (value == null) {
+          throw Exception('Argument required for "$name"');
+        }
+
+        final score = toDouble(value);
+        return Criteria(
+          matches: (p) => p.overallScore >= score,
+          onFail: (p) => 'score too low: ${p.overallScore}',
         );
     }
-    if (name.startsWith('min_score:')) {
-      final score = toDouble(name.split(':')[1]);
-      return Criteria(
-        matches: (p) => p.overallScore >= score,
-        onFail: (p) => 'score too low: ${p.overallScore}',
-      );
-    }
-    return null;
+
+    throw Exception('Unrecognized criteria name: $name');
   }
 }
 
