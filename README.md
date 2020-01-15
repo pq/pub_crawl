@@ -23,12 +23,12 @@ customize behavior in provided "hook" classes.
 
 Supported commands are:
 
-* `pub fetch` - fetch packages that match given criteria (for example, `fetch --max 5 --criteria flutter,min_score:.75`
+* `fetch` - fetch packages that match given criteria (for example, `fetch --max 5 --criteria flutter,min_score:.75`
    fetches Flutter packages whose pub score is 75 or higher)
-* `pub analyze` - analyze packages
-* `pub lint` - a variation of `analyze` that makes it easy to lint packages with specified rules
+* `analyze` - analyze packages
+* `lint` - a variation of `analyze` that makes it easy to lint packages with specified rules
    (for example, `lint --rules=await_only_futures,avoid_as`)
-* `pub clean` - deletes cached packages
+* `clean` - deletes cached packages
 
 For example,
 
