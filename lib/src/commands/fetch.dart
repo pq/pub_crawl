@@ -72,12 +72,10 @@ class FetchCommand extends BaseCommand {
       if (install && !cache.hasDependenciesInstalled(package)) {
         print('Installing dependencies for ${package.name}');
         try {
-          if (verbose) {
-            await cache.installDependencies(package, timeout: timeout)
-              ..stdout.listen(io.stdout.add)
-              ..stderr.listen(io.stderr.add);
-          } else {
-            await cache.installDependencies(package, timeout: timeout);
+          var process =
+              await cache.installDependencies(package, timeout: timeout);
+          if (verbose && process != null) {
+            process..stdout.listen(io.stdout.add)..stderr.listen(io.stderr.add);
           }
         } catch (e) {
           print(e);
