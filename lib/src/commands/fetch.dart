@@ -103,52 +103,51 @@ class FetchCommand extends BaseCommand {
   }) async {
     var count = 0;
     // todo (pq): https
-    var packagePage = 'http://pub.dartlang.org/api/packages';
+    final packagePage = 'http://pub.dartlang.org/api/packages';
     print('Fetching package information from pub.dartlang.org...');
+    final allPackageNames = List<String>.from(
+        jsonDecode(await getBody('$packagePage?compact=1'))['packages']);
     final packages = <Package>[];
-    while (packagePage != null && packages.length < maxCount) {
-      final packageBody = jsonDecode(await getBody(packagePage));
-      for (var packageData in packageBody['packages']) {
-        final package = await RemotePackage.init(packageData);
+    for (var name in allPackageNames) {
+      if (packages.length >= maxCount) {
+        print('(Max processed package count of $maxCount reached.)');
+        break;
+      }
+      var pkgData = jsonDecode(await getBody('$packagePage/$name'))
+          as Map<String, dynamic>;
+      final package = await RemotePackage.init(pkgData);
 
-        ++count;
+      ++count;
 
-        if (!isDart2(package.sdkConstraint)) {
-          if (verbose) {
-            print('Skipped package:${package.name} (not Dart2)');
-          }
+      if (!isDart2(package.sdkConstraint)) {
+        if (verbose) {
+          print('Skipped package:${package.name} (not Dart2)');
+        }
+        continue;
+      }
+
+      // Filter.
+      final failedCriteria =
+          criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
+      if (failedCriteria != null) {
+        onSkip(package, failedCriteria);
+        continue;
+      }
+
+      if (cache.isCached(package)) {
+        if (verbose) {
+          print('Skipped package:${package.name} (already cached)');
           continue;
-        }
-
-        // Filter.
-        final failedCriteria =
-            criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
-        if (failedCriteria != null) {
-          onSkip(package, failedCriteria);
-          continue;
-        }
-
-        if (cache.isCached(package)) {
-          if (verbose) {
-            print('Skipped package:${package.name} (already cached)');
-            continue;
-          }
-        }
-
-        print('Adding package:${package.name}');
-
-        packages.add(package);
-        if (packages.length >= maxCount) {
-          break;
         }
       }
-      packagePage = packageBody['next_url'];
+
+      print('Adding package:${package.name}');
+
+      packages.add(package);
     }
-    print('$count packages processed');
-    if (packagePage == null) {
+
+    if (count == allPackageNames.length) {
       print('(Processed all available packages on pub.)');
-    } else {
-      print('(Max processed package count of $maxCount reached.)');
     }
 
     print('---');
