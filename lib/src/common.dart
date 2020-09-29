@@ -83,6 +83,10 @@ class Criteria {
   }
 
   factory Criteria.forName(String name) {
+    if (name.startsWith('no-')) {
+      return Criteria.negated(Criteria.forName(name.substring(3)));
+    }
+
     String value;
     if (name.contains(':')) {
       final nameValue = name.split(':');
@@ -115,6 +119,10 @@ class Criteria {
 
     throw Exception('Unrecognized criteria name: $name');
   }
+
+  factory Criteria.negated(Criteria other) => Criteria(
+      matches: (p) => !other.matches(p),
+      onFail: (p) => '${other.onFail(p)} (negated)');
 }
 
 /// A simple visitor for analysis options files.
