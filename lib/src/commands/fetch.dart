@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:pool/pool.dart';
+
 import '../../hooks/criteria/fetch.dart';
 import '../cache.dart';
 import '../common.dart';
@@ -108,42 +110,61 @@ class FetchCommand extends BaseCommand {
     final allPackageNames = List<String>.from(
         jsonDecode(await getBody('$packagePage?compact=1'))['packages']);
     final packages = <Package>[];
+
+    // Asynchronously adds the package referenced by `name` to `packages`,
+    // and then releases `resource`.
+    void addPackage(String name, PoolResource resource) async {
+      try {
+        var pkgData = jsonDecode(await getBody('$packagePage/$name'))
+            as Map<String, dynamic>;
+        var error = pkgData['error'];
+        if (error != null) {
+          print('Package not found `$name`');
+          return;
+        }
+        final package = await RemotePackage.init(pkgData);
+
+        ++count;
+
+        if (!isDart2(package.sdkConstraint)) {
+          if (verbose) {
+            print('Skipped package:${package.name} (not Dart2)');
+          }
+          return;
+        }
+
+        // Filter.
+        final failedCriteria =
+            criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
+        if (failedCriteria != null) {
+          onSkip(package, failedCriteria);
+          return;
+        }
+
+        if (cache.isCached(package)) {
+          if (verbose) {
+            print('Skipped package:${package.name} (already cached)');
+            return;
+          }
+        }
+
+        if (packages.length < maxCount) {
+          print('Adding package:${package.name}');
+          packages.add(package);
+        }
+      } finally {
+        resource.release();
+      }
+    }
+
     for (var name in allPackageNames) {
+      var resource = await _requestPool.request();
       if (packages.length >= maxCount) {
         print('(Max processed package count of $maxCount reached.)');
+        resource.release();
         break;
       }
-      var pkgData = jsonDecode(await getBody('$packagePage/$name'))
-          as Map<String, dynamic>;
-      final package = await RemotePackage.init(pkgData);
-
-      ++count;
-
-      if (!isDart2(package.sdkConstraint)) {
-        if (verbose) {
-          print('Skipped package:${package.name} (not Dart2)');
-        }
-        continue;
-      }
-
-      // Filter.
-      final failedCriteria =
-          criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
-      if (failedCriteria != null) {
-        onSkip(package, failedCriteria);
-        continue;
-      }
-
-      if (cache.isCached(package)) {
-        if (verbose) {
-          print('Skipped package:${package.name} (already cached)');
-          continue;
-        }
-      }
-
-      print('Adding package:${package.name}');
-
-      packages.add(package);
+      addPackage(name, resource);
     }
 
     if (count == allPackageNames.length) {
@@ -155,3 +176,6 @@ class FetchCommand extends BaseCommand {
     return packages;
   }
 }
+
+// Pool to limit the number of concurrent requests.
+final _requestPool = Pool(10);
