@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:pool/pool.dart';
+
 import '../../hooks/criteria/fetch.dart';
 import '../cache.dart';
 import '../common.dart';
@@ -103,13 +105,24 @@ class FetchCommand extends BaseCommand {
   }) async {
     var count = 0;
     // todo (pq): https
-    var packagePage = 'http://pub.dartlang.org/api/packages';
+    final packagePage = 'http://pub.dartlang.org/api/packages';
     print('Fetching package information from pub.dartlang.org...');
+    final allPackageNames = List<String>.from(
+        jsonDecode(await getBody('$packagePage?compact=1'))['packages']);
     final packages = <Package>[];
-    while (packagePage != null && packages.length < maxCount) {
-      final packageBody = jsonDecode(await getBody(packagePage));
-      for (var packageData in packageBody['packages']) {
-        final package = await RemotePackage.init(packageData);
+
+    // Asynchronously adds the package referenced by `name` to `packages`,
+    // and then releases `resource`.
+    void addPackage(String name, PoolResource resource) async {
+      try {
+        var pkgData = jsonDecode(await getBody('$packagePage/$name'))
+            as Map<String, dynamic>;
+        var error = pkgData['error'];
+        if (error != null) {
+          print('Package not found `$name`');
+          return;
+        }
+        final package = await RemotePackage.init(pkgData);
 
         ++count;
 
@@ -117,7 +130,7 @@ class FetchCommand extends BaseCommand {
           if (verbose) {
             print('Skipped package:${package.name} (not Dart2)');
           }
-          continue;
+          return;
         }
 
         // Filter.
@@ -125,30 +138,37 @@ class FetchCommand extends BaseCommand {
             criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
         if (failedCriteria != null) {
           onSkip(package, failedCriteria);
-          continue;
+          return;
         }
 
         if (cache.isCached(package)) {
           if (verbose) {
             print('Skipped package:${package.name} (already cached)');
-            continue;
+            return;
           }
         }
 
-        print('Adding package:${package.name}');
-
-        packages.add(package);
-        if (packages.length >= maxCount) {
-          break;
+        if (packages.length < maxCount) {
+          print('Adding package:${package.name}');
+          packages.add(package);
         }
+      } finally {
+        resource.release();
       }
-      packagePage = packageBody['next_url'];
     }
-    print('$count packages processed');
-    if (packagePage == null) {
+
+    for (var name in allPackageNames) {
+      var resource = await _requestPool.request();
+      if (packages.length >= maxCount) {
+        print('(Max processed package count of $maxCount reached.)');
+        resource.release();
+        break;
+      }
+      addPackage(name, resource);
+    }
+
+    if (count == allPackageNames.length) {
       print('(Processed all available packages on pub.)');
-    } else {
-      print('(Max processed package count of $maxCount reached.)');
     }
 
     print('---');
@@ -156,3 +176,6 @@ class FetchCommand extends BaseCommand {
     return packages;
   }
 }
+
+// Pool to limit the number of concurrent requests.
+final _requestPool = Pool(10);
