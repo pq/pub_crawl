@@ -2,7 +2,8 @@
 
 A tool for fetching and exploring Dart packages published on [`pub`](https://pub.dartlang.org/).
 
-[![Build Status](https://travis-ci.org/pq/pub_crawl.svg)](https://travis-ci.org/pq/pub_crawl)
+[![Build Status](https://github.com/pq/pub_crawl/actions/workflows/dart.yml/badge.svg)](https://github.com/pq/pub_crawl/actions)
+
 
 **Disclaimer:** This is not an officially supported Google product.
 
