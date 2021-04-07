@@ -25,7 +25,6 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/source/line_info.dart';
 import 'package:analyzer/src/generated/engine.dart' // ignore: implementation_imports
     show
-        AnalysisEngine,
         AnalysisErrorInfo,
         AnalysisErrorInfoImpl;
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
@@ -51,7 +50,7 @@ class AnalyzeCommand extends BaseCommand {
   @override
   String get name => 'analyze';
 
-  bool get color => argResults['color'];
+  bool get color => argResults!['color'];
 
   AnalyzeCommand() {
     argParser.addFlag('verbose', help: 'verbose output.');
@@ -64,7 +63,7 @@ class AnalyzeCommand extends BaseCommand {
     argParser.addFlag('no-errors', help: 'do not report analysis errors.');
   }
 
-  bool get showErrors => !argResults['no-errors'];
+  bool get showErrors => !argResults!['no-errors'];
 
   @override
   @mustCallSuper
@@ -116,7 +115,7 @@ class AnalyzeCommand extends BaseCommand {
       preAnalyze(context);
 
       for (var filePath in context.contextRoot.analyzedFiles()) {
-        if (AnalysisEngine.isDartFileName(filePath)) {
+        if (isDartFileName(filePath)) {
           if (showErrors) {
             final result = await context.currentSession.getErrors(filePath);
             if (result.errors.isNotEmpty) {
@@ -128,10 +127,10 @@ class AnalyzeCommand extends BaseCommand {
           final result = await context.currentSession.getResolvedUnit(filePath);
 
           // AST Visitor callback.
-          result.unit.accept(visitor);
+          result.unit?.accept(visitor);
         }
 
-        if (AnalysisEngine.isAnalysisOptionsFileName(filePath)) {
+        if (isAnalysisOptionsFileName(filePath)) {
           // Options Visitor callback.
           final optionsFile = AnalysisOptionsFile(filePath);
           OptionsVisitor().visit(optionsFile);
@@ -158,7 +157,7 @@ class AnalyzeCommand extends BaseCommand {
       }
     }
     final stats = AnalysisStats();
-    final options = CommandLineOptions.fromArgs(argResults);
+    final options = CommandLineOptions.fromArgs(argResults!);
     final formatter = HumanErrorFormatter(io.stdout, options, stats);
     formatter.formatErrors(infos);
     formatter.flush();
@@ -178,6 +177,13 @@ final Map<String, int> _severityCompare = {
   'hint': 1,
 };
 
+/// Returns `true` if this [fileName] is a Dart file.
+bool isDartFileName(String fileName) => fileName.endsWith('.dart');
+
+/// Returns `true` if this [fileName] is an analysis options file.
+bool isAnalysisOptionsFileName(String fileName) =>
+    fileName == 'analysis_options.yaml';
+
 String _pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
 /// Given an absolute path, return a relative path if the file is contained in
@@ -191,7 +197,7 @@ ErrorSeverity _severityIdentity(AnalysisError error) =>
 
 /// Returns desired severity for the given [error] (or `null` if it's to be
 /// suppressed).
-typedef SeverityProcessor = ErrorSeverity Function(AnalysisError error);
+typedef SeverityProcessor = ErrorSeverity? Function(AnalysisError error);
 
 /// Analysis statistics counter.
 class AnalysisStats {
@@ -208,7 +214,7 @@ class AnalysisStats {
   int get filteredCount => errorCount + warnCount + hintCount + lintCount;
 
   /// Print statistics to [out].
-  void print([StringSink out]) {
+  void print([StringSink? out]) {
     out ??= io.stdout;
     final hasErrors = errorCount != 0;
     final hasWarns = warnCount != 0;
@@ -268,10 +274,10 @@ abstract class ErrorFormatter {
   final StringSink out;
   final CommandLineOptions options;
   final AnalysisStats stats;
-  SeverityProcessor _severityProcessor;
+  late final SeverityProcessor _severityProcessor;
 
   ErrorFormatter(this.out, this.options, this.stats,
-      {SeverityProcessor severityProcessor}) {
+      {SeverityProcessor? severityProcessor}) {
     _severityProcessor = severityProcessor ?? _severityIdentity;
   }
 
@@ -302,7 +308,7 @@ abstract class ErrorFormatter {
 
   /// Compute the severity for this [error] or `null` if this error should be
   /// filtered.
-  ErrorSeverity _computeSeverity(AnalysisError error) =>
+  ErrorSeverity? _computeSeverity(AnalysisError error) =>
       _severityProcessor(error);
 }
 
@@ -336,17 +342,17 @@ class CLIError implements Comparable<CLIError> {
   final int column;
   final String message;
   final String errorCode;
-  final String correction;
+  final String? correction;
 
   CLIError({
-    this.severity,
-    this.sourcePath,
-    this.offset,
-    this.line,
-    this.column,
-    this.message,
-    this.errorCode,
-    this.correction,
+    required this.severity,
+    required this.sourcePath,
+    required this.offset,
+    required this.line,
+    required this.column,
+    required this.message,
+    required this.errorCode,
+    required this.correction,
   });
 
   @override
@@ -371,7 +377,8 @@ class CLIError implements Comparable<CLIError> {
   @override
   int compareTo(CLIError other) {
     // severity
-    var compare = _severityCompare[other.severity] - _severityCompare[severity];
+    var compare =
+        _severityCompare[other.severity]! - _severityCompare[severity]!;
     if (compare != 0) return compare;
 
     // path
@@ -405,10 +412,9 @@ class HumanErrorFormatter extends ErrorFormatter {
 
   HumanErrorFormatter(
       StringSink out, CommandLineOptions options, AnalysisStats stats,
-      {SeverityProcessor severityProcessor})
-      : super(out, options, stats, severityProcessor: severityProcessor) {
-    ansi = AnsiLogger(this.options.color);
-  }
+      {SeverityProcessor? severityProcessor})
+      : ansi = AnsiLogger(options.color),
+        super(out, options, stats, severityProcessor: severityProcessor);
 
   @override
   void flush() {
@@ -451,9 +457,10 @@ class HumanErrorFormatter extends ErrorFormatter {
   void formatError(
       Map<AnalysisError, LineInfo> errorToLine, AnalysisError error) {
     final source = error.source;
-    var location = errorToLine[error].getLocation(error.offset);
-
+    var location = errorToLine[error]?.getLocation(error.offset);
+    if (location == null) return;
     final severity = _severityProcessor(error);
+    if (severity == null) return;
 
     // Get display name; translate INFOs into LINTS and HINTS.
     var errorType = severity.displayName;

@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:collection/collection.dart';
 import 'package:pool/pool.dart';
 
 import '../../hooks/criteria/fetch.dart';
@@ -46,18 +47,18 @@ class FetchCommand extends BaseCommand {
   @override
   String get description => 'fetch packages.';
 
-  bool get install => argResults['install'];
+  bool get install => argResults!['install'];
 
   @override
   String get name => 'fetch';
 
   @override
   Future run() async {
-    final maxFetch = toInt(argResults['max'] ?? defaultFetchLimit);
-    final timeout = toInt(argResults['timeout'] ?? -1);
+    final maxFetch = toInt(argResults!['max'] ?? defaultFetchLimit);
+    final timeout = toInt(argResults!['timeout'] ?? -1);
 
     final criteria =
-        Criteria.fromArgs(argResults['criteria']) ?? defaultFetchCriteria;
+        Criteria.fromArgs(argResults!['criteria']) ?? defaultFetchCriteria;
 
     var skipCount = 0;
     var packages = await _listPackages(criteria, maxFetch, onSkip: (p, c) {
@@ -101,7 +102,7 @@ class FetchCommand extends BaseCommand {
   Future<List<Package>> _listPackages(
     List<Criteria> criteria,
     int maxCount, {
-    void Function(Package package, Criteria criteria) onSkip,
+    required void Function(Package package, Criteria criteria) onSkip,
   }) async {
     var count = 0;
     // todo (pq): https
@@ -135,7 +136,8 @@ class FetchCommand extends BaseCommand {
 
         // Filter.
         final failedCriteria =
-            criteria.firstWhere((c) => !c.matches(package), orElse: () => null);
+            criteria.firstWhereOrNull((c) => !c.matches(package));
+
         if (failedCriteria != null) {
           onSkip(package, failedCriteria);
           return;

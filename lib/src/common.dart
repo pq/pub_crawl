@@ -13,10 +13,10 @@
 //  limitations under the License.
 
 import 'dart:io';
+import 'package:collection/collection.dart';
 
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'cache.dart';
@@ -26,60 +26,61 @@ final _client = http.Client();
 
 Future<String> getBody(String url) async => (await getResponse(url)).body;
 
-Future<http.Response> getResponse(String url) async =>
-    _client.get(url, headers: const {'User-Agent': 'dart.pkg.pub_crawl'});
+Future<http.Response> getResponse(String url) async => _client
+    .get(Uri.parse(url), headers: const {'User-Agent': 'dart.pkg.pub_crawl'});
 
 int toInt(Object value) {
   if (value is int) {
     return value;
   }
-  try {
-    return int.parse(value);
-  } on FormatException catch (e) {
-    print('expected int value but got "$value": ${e.message}');
-    rethrow;
+  if (value is String) {
+    try {
+      return int.parse(value);
+    } on FormatException {
+      rethrow;
+    }
   }
+  throw FormatException('$value cannot be parsed to an int');
 }
 
 double toDouble(Object value) {
   if (value is double) {
     return value;
   }
-  try {
-    return double.parse(value);
-  } on FormatException catch (e) {
-    print('expected double value but got "$value": ${e.message}');
-    rethrow;
+  if (value is String) {
+    try {
+      return double.parse(value);
+    } on FormatException {
+      rethrow;
+    }
   }
+  throw FormatException('$value cannot be parsed to a double');
 }
 
 abstract class BaseCommand extends Command {
   /// Shared cache object.
-  static Cache _cache;
+  static Cache? _cache;
 
   Cache get cache => _cache ??= Cache();
 
-  bool get verbose => argResults['verbose'];
+  bool get verbose => argResults!['verbose'];
 }
 
 typedef PackageMatcher = bool Function(Package package);
-typedef FailDescription = String Function(Package package);
+typedef FailDescription = String? Function(Package package);
 
 class Criteria {
   final FailDescription onFail;
   final PackageMatcher matches;
 
-  Criteria({@required this.matches, @required this.onFail});
+  Criteria({required this.matches, required this.onFail});
 
-  static List<Criteria> fromArgs(String argString) {
+  static List<Criteria>? fromArgs(String? argString) {
     if (argString == null) {
       return null;
     }
-    final args = argString?.split(',') ?? <String>[];
-    return args
-        .map((name) => Criteria.forName(name))
-        .where((c) => c != null)
-        .toList();
+    final args = argString.split(',');
+    return args.map((name) => Criteria.forName(name)).whereNotNull().toList();
   }
 
   factory Criteria.forName(String name) {
@@ -87,7 +88,7 @@ class Criteria {
       return Criteria.negated(Criteria.forName(name.substring(3)));
     }
 
-    String value;
+    String? value;
     if (name.contains(':')) {
       final nameValue = name.split(':');
       name = nameValue[0];
@@ -137,9 +138,9 @@ class AnalysisOptionsFile {
   YamlMap get yaml => _yaml ??= _readYamlFromString(contents);
 
   String get contents => _contents ??= file.readAsStringSync();
-  String _contents;
+  String? _contents;
 
-  YamlMap _yaml;
+  YamlMap? _yaml;
 
   AnalysisOptionsFile(String path) : file = File(path);
 }
@@ -161,14 +162,14 @@ class PubspecFile {
   YamlMap get yaml => _yaml ??= _readYamlFromString(contents);
 
   String get contents => _contents ??= file.readAsStringSync();
-  String _contents;
+  String? _contents;
 
-  YamlMap _yaml;
+  YamlMap? _yaml;
 
   PubspecFile(String path) : file = File(path);
 }
 
-YamlMap _readYamlFromString(String optionsSource) {
+YamlMap _readYamlFromString(String? optionsSource) {
   if (optionsSource == null) {
     return YamlMap();
   }

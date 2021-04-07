@@ -20,26 +20,36 @@ import 'package:yaml/yaml.dart' as yaml;
 import 'common.dart';
 
 class LocalPackage extends Package {
+  LocalPackage({
+    required this.name,
+    required this.version,
+    required this.overallScore,
+    required this.popularityScore,
+    required this.maintenanceScore,
+    required this.healthScore,
+    required this.dir,
+  });
+
   @override
-  String archiveUrl;
+  String? archiveUrl;
 
   @override
   Directory dir;
 
   @override
-  Map<String, dynamic> pubspec;
+  Map<String, dynamic>? pubspec;
 
   @override
   String name;
 
   @override
-  String repository;
+  String? repository;
 
   @override
   String version;
 
   @override
-  String sdkConstraint;
+  String? sdkConstraint;
 
   @override
   double overallScore;
@@ -53,24 +63,17 @@ class LocalPackage extends Package {
   double healthScore;
   @override
   Map<String, dynamic> get dependencies {
-    if (_pubspec == null) {
-      return {};
-    }
-
     final deps = _pubspec['dependencies']?.value;
     if (deps is yaml.YamlMap) {
       return deps.nodes
           .map((k, v) => MapEntry<String, dynamic>(k.toString(), v));
     }
-
-//    deps.
-
     return {};
   }
 
   Map<dynamic, yaml.YamlNode> get _pubspec {
-//    if (_pubspec == null) {
-    final pubspecFile = File('${dir.path}/pubspec.yaml');
+    var path = dir.path;
+    final pubspecFile = File('$path/pubspec.yaml');
     if (pubspecFile.existsSync()) {
       try {
         return (yaml.loadYaml(pubspecFile.readAsStringSync()) as yaml.YamlMap)
@@ -94,7 +97,6 @@ class LocalPackage extends Package {
 
 class Metrics {
   final _data;
-
   Metrics(this._data);
 
   double get health => _getScorecardMetric('healthScore');
@@ -103,31 +105,40 @@ class Metrics {
   double get overall => _getScorecardMetric('overallScore');
   double get popularity => _getScorecardMetric('popularityScore');
   double _getScorecardMetric(String name) =>
-      _data['scorecard'] != null ? _data['scorecard'][name] : null;
+      _data['scorecard'] != null ? _data['scorecard'][name] : -1;
 }
 
 abstract class Package {
   Package();
-  factory Package.fromData(String name, dynamic jsonData) {
+  static Package? fromData(String name, dynamic jsonData) {
     final packageData = jsonData[name];
     if (packageData == null) {
       return null;
     }
 
-    final package = LocalPackage();
-    package.name = name;
-    package.version = packageData['version'];
-    package.overallScore = packageData['score'];
-    package.popularityScore = packageData['popularity'];
-    package.maintenanceScore = packageData['maintenance'];
-    package.healthScore = packageData['health'];
-    package.dir = Directory('third_party/cache/${packageData['sourcePath']}');
+    final package = LocalPackage(
+      name: name,
+      version: packageData['version'],
+      overallScore: packageData['score'],
+      popularityScore: packageData['popularity'],
+      maintenanceScore: packageData['maintenance'],
+      healthScore: packageData['health'],
+      dir: Directory('third_party/cache/${packageData['sourcePath']}'),
+    );
+
     return package;
   }
-  String get archiveUrl;
-  Map<String, dynamic> get dependencies => pubspec['dependencies'];
 
-  Directory get dir => null;
+  String? get archiveUrl;
+  Map<String, dynamic>? get dependencies {
+    var pubspec = this.pubspec;
+    if (pubspec == null) {
+      return null;
+    }
+    return pubspec['dependencies'];
+  }
+
+  Directory? get dir => null;
 
   double get healthScore;
 
@@ -139,11 +150,11 @@ abstract class Package {
 
   double get popularityScore;
 
-  Map<String, dynamic> get pubspec;
+  Map<String, dynamic>? get pubspec;
 
-  String get repository;
+  String? get repository;
 
-  String get sdkConstraint;
+  String? get sdkConstraint;
 
   /// Cache-relative path to local package source.
   String get sourcePath => '$name-$version';
@@ -167,7 +178,8 @@ abstract class Package {
 class RemotePackage extends Package {
   final Map<String, dynamic> _data;
 
-  Metrics metrics;
+  // todo(pq):fix or remove metrics
+  Metrics? metrics;
 
   RemotePackage._(this._data);
 
@@ -175,19 +187,19 @@ class RemotePackage extends Package {
   String get archiveUrl => _data['latest']['archive_url'];
 
   @override
-  double get healthScore => metrics.health;
+  double get healthScore => metrics?.health ?? -1;
 
   @override
-  double get maintenanceScore => metrics.maintenance;
+  double get maintenanceScore => metrics?.maintenance ?? -1;
 
   @override
   String get name => _data['name'];
 
   @override
-  double get overallScore => metrics.overall;
+  double get overallScore => metrics?.overall ?? -1;
 
   @override
-  double get popularityScore => metrics.popularity;
+  double get popularityScore => metrics?.popularity ?? -1;
 
   @override
   Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
@@ -196,7 +208,7 @@ class RemotePackage extends Package {
   String get repository => pubspec['repository'];
 
   @override
-  String get sdkConstraint {
+  String? get sdkConstraint {
     final env = pubspec['environment'];
     return env == null ? null : env['sdk'];
   }
@@ -206,18 +218,19 @@ class RemotePackage extends Package {
 
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
-    final url =
-        'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
-    final body = await getBody(url);
-    try {
-      var metricsData = jsonDecode(body);
-      package.metrics = Metrics(metricsData);
-    } on FormatException catch (e) {
-      print('unable to decode json from: $url');
-      print(e);
-      print(body);
-      rethrow;
-    }
+    // todo(pq):fix or remove metrics
+    // final url =
+    //     'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
+    // final body = await getBody(url);
+    // try {
+    //   var metricsData = jsonDecode(body);
+    //   package.metrics = Metrics(metricsData);
+    // } on FormatException catch (e) {
+    //   print('unable to decode json from: $url');
+    //   print(e);
+    //   print(body);
+    //   rethrow;
+    // }
     return package;
   }
 }

@@ -50,7 +50,7 @@ class Index {
     _indexFile.writeAsStringSync(encoder.convert(_jsonData));
   }
 
-  Package getPackage(String name) => Package.fromData(name, _jsonData);
+  Package? getPackage(String name) => Package.fromData(name, _jsonData);
 
   void add(Package package) {
     package.addToJsonData(_jsonData);
@@ -71,11 +71,12 @@ class Cache {
 
   Directory get dir => _cacheDir;
 
-  PackageIndexer onProcess;
+  PackageIndexer? onProcess;
 
   Cache() : index = Index()..read();
 
   void process(Package package) async {
+    var onProcess = this.onProcess;
     if (onProcess != null) {
       onProcess(package, this);
     }
@@ -110,7 +111,9 @@ class Cache {
         }).then((int exitCode) => p));
   }
 
-  Future<Process> installDependencies(Package package, {int timeout}) async {
+  Future<Process?> installDependencies(Package package,
+      {required int timeout}) async {
+    print('${package.name}-${package.version}');
     final sourceDir = getSourceDir(package);
     final sourcePath = sourceDir.path;
     if (!sourceDir.existsSync()) {
@@ -130,7 +133,7 @@ class Cache {
     //TODO: recurse and run pub get in example dirs.
     print('Running "pub get" in ${path.basename(sourcePath)}');
     return raceProcess(
-        Process.start('pub', ['get', '--no-precompile'],
+        Process.start('dart', ['pub', 'get', '--no-precompile'],
             workingDirectory: sourcePath),
         timeout);
   }
@@ -139,6 +142,10 @@ class Cache {
     final name = package.name;
     final version = package.version;
     final url = package.archiveUrl;
+    if (url == null) {
+      print('Error downloading $url:\nno archive url available');
+      return false;
+    }
     try {
       // todo (pq): migrate to _downloadDir
       const downloadDir = 'third_party/download';
@@ -171,7 +178,7 @@ class Cache {
   Directory getSourceDir(Package package) =>
       Directory('third_party/cache/${package.name}-${package.version}');
 
-  List<Package> list({List<Criteria> matching}) {
+  List<Package> list({List<Criteria>? matching}) {
     final packages = <Package>[];
     if (_cacheDir.existsSync()) {
       for (var packageDir in _cacheDir.listSync()) {

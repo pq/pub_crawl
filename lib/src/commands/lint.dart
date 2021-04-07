@@ -53,7 +53,7 @@ class LintCommand extends AnalyzeCommand {
   Future run() async {
     registerLintRules();
 
-    final lints = argResults['rules'];
+    final lints = argResults!['rules'];
     if (lints == null || lints.isEmpty) {
       print('No lint rules specified.');
       printUsage();
