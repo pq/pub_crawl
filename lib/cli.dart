@@ -34,7 +34,6 @@ class Cli extends CommandRunner {
 
   @override
   Future run(Iterable<String> args) async {
-//    print(Ansi.terminalSupportsAnsi);
     final results = parse(args);
     return runCommand(results);
   }
