@@ -16,5 +16,13 @@ import 'package:pub_semver/pub_semver.dart';
 
 final _dart2 = VersionConstraint.parse('>=2.0.0');
 
-bool isDart2(String sdkVersion) =>
-    VersionConstraint.parse(sdkVersion).allowsAny(_dart2);
+bool isDart2(String sdkVersion) {
+  var constraint = VersionConstraint.parse(sdkVersion);
+  if (constraint is VersionRange) {
+    if (constraint.max == null) {
+      return constraint.min?.major == 2;
+    }
+  }
+
+  return constraint.allowsAny(_dart2);
+}
