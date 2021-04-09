@@ -15,8 +15,6 @@ The kinds of investigations `pub_crawl` was designed to support include ones lik
 * Lint Rule Testing - how does a new or existing rule perform on code in the wild?
 * Language Experiment Testing - do existing packages continue to analyze cleanly when we enable an experiment?
 
-In the future, we'd like to add a `migrate` command to auto-apply code migrations for bulk analysis.
-
 ## Usage
 
 Pub crawl is run as a command-line tool.  Running from source is recommended as that allows you to
@@ -34,7 +32,7 @@ Supported commands are:
 For example,
 
 ```
-dart bin/pub_crawl.dart fetch --max 10 --criteria flutter,min_score:.75
+dart bin/pub_crawl.dart fetch --max 10 --criteria flutter,min_score:75
 dart bin/pub_crawl.dart analyze
 ```
 
@@ -48,13 +46,21 @@ packages on qualities of interest.  `pub_crawl` defines a few criteria out of th
 * `flutter` - filters on packages that depend on Flutter
 * `min_score:` - filters on overall pub package score (see the [pub scoring docs] for details)
 
-Using criteria we can limit a `fetch` to Flutter packages that score .75 or higher like this:
+Using criteria we can limit a `fetch` to Flutter packages that score 75 or higher like this:
 
-    dart bin/pub_crawl.dart --criteria flutter,min_score:.75
+    dart bin/pub_crawl.dart --criteria flutter,min_score:75
 
 If you want to define your own criteria, you can do so by adding a hook.
 
 ### Adding Your own Hooks
+
+----------------------- 
+🔈 **UPDATE:** hooks seemed like a good idea at the time but will likely go away.  Consider
+[`package:surveyor`][surveyor] for custom analysis instead.
+
+----------------------- 
+
+
 
 You can customize various aspects of `pub_crawl` by adding your own logic to a number of
 files that define hooks that are called during command execution.
