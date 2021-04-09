@@ -33,5 +33,5 @@ jobs:
       - name: Analyze project sources
         run: dart analyze --fatal-infos
 
-#       - name: Run tests
-#         run: dart test
+      - name: Run tests
+        run: dart test
