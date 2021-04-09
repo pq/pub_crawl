@@ -175,7 +175,7 @@ abstract class Package {
 class RemotePackage extends Package {
   final Map<String, dynamic> _data;
 
-  // todo(pq):fix or remove metrics
+  // todo(pq):fix or remove metrics (https://github.com/pq/pub_crawl/issues/14)
   Metrics? metrics;
 
   RemotePackage._(this._data);
@@ -215,7 +215,7 @@ class RemotePackage extends Package {
 
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
-    // todo(pq):fix or remove metrics
+    // todo(pq):fix or remove metrics (https://github.com/pq/pub_crawl/issues/14)
     // final url =
     //     'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
     // final body = await getBody(url);
