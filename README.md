@@ -24,11 +24,11 @@ customize behavior in provided "hook" classes.
 
 Supported commands are:
 
-* `fetch` - fetch packages that match given criteria (for example, `fetch --max 5 --criteria flutter,min_score:.75`
-   fetches Flutter packages whose pub score is 75 or higher)
-* `analyze` - analyze packages
+* `fetch` - fetch packages that match given criteria (for example, `fetch --max 5 --criteria flutter,min_score:75`
+   fetches 5 Flutter packages whose pub score is 75 or higher)
+* `analyze` - analyze packages (✋ **DEPRECATED** -- consider [`package:surveyor`][surveyor] instead)
 * `lint` - a variation of `analyze` that makes it easy to lint packages with specified rules
-   (for example, `lint --rules=await_only_futures,avoid_as`)
+   (for example, `lint --rules=await_only_futures,avoid_as`) (✋ **DEPRECATED** -- consider [`package:surveyor`][surveyor] instead)
 * `clean` - deletes cached packages
 
 For example,
