@@ -127,7 +127,15 @@ class FetchCommand extends BaseCommand {
 
         ++count;
 
-        if (!isDart2(package.sdkConstraint)) {
+        var sdkConstraint = package.sdkConstraint;
+        if (sdkConstraint == null) {
+          if (verbose) {
+            print('Skipped package:${package.name} (no SDK constraint)');
+          }
+          return;
+        }
+
+        if (!isDart2(sdkConstraint)) {
           if (verbose) {
             print('Skipped package:${package.name} (not Dart2)');
           }
