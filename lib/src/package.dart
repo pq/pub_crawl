@@ -12,26 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:yaml/yaml.dart' as yaml;
 
-class LocalPackage extends Package {
-  LocalPackage({
-    required this.name,
-    required this.version,
-    required this.overallScore,
-    required this.popularityScore,
-    required this.maintenanceScore,
-    required this.healthScore,
-    required this.dir,
-  });
+import 'common.dart';
 
+class LocalPackage extends Package {
   @override
   String? archiveUrl;
 
   @override
   Directory dir;
+
+  @override
+  int pubPoints;
 
   @override
   Map<String, dynamic>? pubspec;
@@ -48,16 +44,13 @@ class LocalPackage extends Package {
   @override
   String? sdkConstraint;
 
-  @override
-  double overallScore;
+  LocalPackage({
+    required this.name,
+    required this.version,
+    required this.pubPoints,
+    required this.dir,
+  });
 
-  @override
-  double popularityScore;
-
-  @override
-  double maintenanceScore;
-  @override
-  double healthScore;
   @override
   Map<String, dynamic> get dependencies {
     final deps = _pubspec['dependencies']?.value;
@@ -80,12 +73,6 @@ class LocalPackage extends Package {
       }
     }
     return <dynamic, yaml.YamlNode>{};
-
-//    return pubspecFile.existsSync()
-//        ? (yaml.loadYaml(pubspecFile.readAsStringSync()) as yaml.YamlMap).nodes
-//        : <String, dynamic>{};
-//    }
-//    return _pubspec;
   }
 
   @override
@@ -96,37 +83,13 @@ class Metrics {
   final _data;
   Metrics(this._data);
 
-  double get health => _getScorecardMetric('healthScore');
-
-  double get maintenance => _getScorecardMetric('maintenanceScore');
-  double get overall => _getScorecardMetric('overallScore');
-  double get popularity => _getScorecardMetric('popularityScore');
-  double _getScorecardMetric(String name) =>
-      _data['scorecard'] != null ? _data['scorecard'][name] : -1;
+  int get grantedPoints => _data['score']['grantedPoints'];
 }
 
 abstract class Package {
   Package();
-  static Package? fromData(String name, dynamic jsonData) {
-    final packageData = jsonData[name];
-    if (packageData == null) {
-      return null;
-    }
-
-    final package = LocalPackage(
-      name: name,
-      version: packageData['version'],
-      overallScore: packageData['score'],
-      popularityScore: packageData['popularity'],
-      maintenanceScore: packageData['maintenance'],
-      healthScore: packageData['health'],
-      dir: Directory('third_party/cache/${packageData['sourcePath']}'),
-    );
-
-    return package;
-  }
-
   String? get archiveUrl;
+
   Map<String, dynamic>? get dependencies {
     var pubspec = this.pubspec;
     if (pubspec == null) {
@@ -137,15 +100,9 @@ abstract class Package {
 
   Directory? get dir => null;
 
-  double get healthScore;
-
-  double get maintenanceScore;
-
   String get name;
 
-  double get overallScore;
-
-  double get popularityScore;
+  int get pubPoints;
 
   Map<String, dynamic>? get pubspec;
 
@@ -161,21 +118,33 @@ abstract class Package {
   void addToJsonData(dynamic jsonData) {
     jsonData[name] = {
       'version': version,
-      'score': overallScore,
-      'popularity': popularityScore,
-      'maintenance': maintenanceScore,
-      'health': healthScore,
+      'pubPoints': pubPoints,
       'sourcePath': sourcePath,
     };
   }
 
   bool isFlutterPackage() => dependencies?.containsKey('flutter') == true;
+
+  static Package? fromData(String name, dynamic jsonData) {
+    final packageData = jsonData[name];
+    if (packageData == null) {
+      return null;
+    }
+
+    final package = LocalPackage(
+      name: name,
+      version: packageData['version'],
+      pubPoints: packageData['pubPoints'],
+      dir: Directory('third_party/cache/${packageData['sourcePath']}'),
+    );
+
+    return package;
+  }
 }
 
 class RemotePackage extends Package {
   final Map<String, dynamic> _data;
 
-  // todo(pq):fix or remove metrics (https://github.com/pq/pub_crawl/issues/14)
   Metrics? metrics;
 
   RemotePackage._(this._data);
@@ -184,20 +153,10 @@ class RemotePackage extends Package {
   String get archiveUrl => _data['latest']['archive_url'];
 
   @override
-  double get healthScore => metrics?.health ?? -1;
-
-  @override
-  double get maintenanceScore => metrics?.maintenance ?? -1;
-
-  @override
   String get name => _data['name'];
 
   @override
-  double get overallScore => metrics?.overall ?? -1;
-
-  @override
-  double get popularityScore => metrics?.popularity ?? -1;
-
+  int get pubPoints => metrics?.grantedPoints ?? -1;
   @override
   Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
 
@@ -215,19 +174,19 @@ class RemotePackage extends Package {
 
   static Future<Package> init(Map<String, dynamic> data) async {
     final package = RemotePackage._(data);
-    // todo(pq):fix or remove metrics (https://github.com/pq/pub_crawl/issues/14)
-    // final url =
-    //     'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
-    // final body = await getBody(url);
-    // try {
-    //   var metricsData = jsonDecode(body);
-    //   package.metrics = Metrics(metricsData);
-    // } on FormatException catch (e) {
-    //   print('unable to decode json from: $url');
-    //   print(e);
-    //   print(body);
-    //   rethrow;
-    // }
+    final url =
+        'https://pub.dartlang.org/api/packages/${package.name}/metrics?pretty&reports';
+    final body = await getBody(url);
+    try {
+      var metricsData = jsonDecode(body);
+      // print(JsonEncoder.withIndent('  ').convert(metricsData));
+      package.metrics = Metrics(metricsData);
+    } on FormatException catch (e) {
+      print('unable to decode json from: $url');
+      print(e);
+      print(body);
+      rethrow;
+    }
     return package;
   }
 }

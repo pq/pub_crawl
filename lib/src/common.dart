@@ -35,6 +35,10 @@ int toInt(Object value) {
   }
   if (value is String) {
     try {
+      // Support legacy double format.
+      if (value.startsWith('.')) {
+        value = value.substring(1);
+      }
       return int.parse(value);
     } on FormatException {
       rethrow;
@@ -111,10 +115,10 @@ class Criteria {
           throw Exception('Argument required for "$name"');
         }
 
-        final score = toDouble(value);
+        final score = toInt(value);
         return Criteria(
-          matches: (p) => p.overallScore >= score,
-          onFail: (p) => 'score too low: ${p.overallScore}',
+          matches: (p) => p.pubPoints >= score,
+          onFail: (p) => 'score too low: ${p.pubPoints}',
         );
     }
 
