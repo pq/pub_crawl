@@ -80,7 +80,7 @@ class LocalPackage extends Package {
 }
 
 class Metrics {
-  final _data;
+  final dynamic _data;
   Metrics(this._data);
 
   int get grantedPoints => _data['score']['grantedPoints'];

@@ -1,7 +1,4 @@
-# Defines a default set of lint rules enforced for
-# projects at Google. For details and rationale,
-# see https://github.com/dart-lang/pedantic#enabled-lints.
-include: package:pedantic/analysis_options.yaml
+include: package:lints/recommended.yaml
 
 linter:
   rules:
@@ -15,6 +12,7 @@ linter:
     - await_only_futures
     - camel_case_types
     - comment_references
+    - depend_on_referenced_packages
     - empty_statements
     - hash_and_equals
     - implementation_imports
