@@ -78,7 +78,9 @@ class FetchCommand extends BaseCommand {
           var process =
               await cache.installDependencies(package, timeout: timeout);
           if (verbose && process != null) {
-            process..stdout.listen(io.stdout.add)..stderr.listen(io.stderr.add);
+            process
+              ..stdout.listen(io.stdout.add)
+              ..stderr.listen(io.stderr.add);
           }
         } catch (e) {
           print(e);

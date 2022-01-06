@@ -101,9 +101,9 @@ class AnalyzeCommand extends BaseCommand {
 
   final visitor = AstVisitor();
 
-  Future<List<ErrorsResult>> _analyzeFiles(
+  Future<List<AnalysisErrorInfo>> _analyzeFiles(
       ResourceProvider resourceProvider, List<String> analysisRoots) async {
-    final results = <ErrorsResult>[];
+    final infos = <AnalysisErrorInfo>[];
     final collection = AnalysisContextCollection(
         includedPaths: analysisRoots, resourceProvider: resourceProvider);
     for (var context in collection.contexts) {
@@ -116,18 +116,18 @@ class AnalyzeCommand extends BaseCommand {
 
       for (var filePath in context.contextRoot.analyzedFiles()) {
         if (isDartFileName(filePath)) {
+          final result = await context.currentSession.getResolvedUnit(filePath)
+              as ResolvedUnitResult;
+
           if (showErrors) {
-            final result = await context.currentSession.getErrors(filePath);
-            if (result.errors.isNotEmpty) {
-              results.add(result);
+            final errors = result.errors.where(showError).toList();
+            if (errors.isNotEmpty) {
+              infos.add(AnalysisErrorInfoImpl(errors, result.lineInfo));
             }
           }
 
-          // todo (pq): move this up and collect errors from the resolved result.
-          final result = await context.currentSession.getResolvedUnit(filePath);
-
           // AST Visitor callback.
-          result.unit?.accept(visitor);
+          result.unit.accept(visitor);
         }
 
         if (isAnalysisOptionsFileName(filePath)) {
@@ -145,17 +145,10 @@ class AnalyzeCommand extends BaseCommand {
     }
     visitor.onVisitFinish();
 
-    return results;
+    return infos;
   }
 
-  void _printAnalysisResults(List<ErrorsResult> results) {
-    final infos = <AnalysisErrorInfo>[];
-    for (var result in results) {
-      final errors = result.errors.where(showError).toList();
-      if (errors.isNotEmpty) {
-        infos.add(AnalysisErrorInfoImpl(errors, result.lineInfo));
-      }
-    }
+  void _printAnalysisResults(List<AnalysisErrorInfo> infos) {
     final stats = AnalysisStats();
     final options = CommandLineOptions.fromArgs(argResults!);
     final formatter = HumanErrorFormatter(io.stdout, options, stats);
@@ -164,7 +157,7 @@ class AnalyzeCommand extends BaseCommand {
     stats.print();
   }
 
-  bool showError(AnalysisError element) => true;
+  bool showError(AnalysisError error) => true;
 
   String get commandVerb => 'Analyzing';
 }
@@ -478,9 +471,9 @@ class HumanErrorFormatter extends ErrorFormatter {
       message = message.substring(0, message.length - 1);
     }
     String sourcePath;
-    if (source.uriKind == UriKind.DART_URI) {
+    if (source.uri.isScheme('dart')) {
       sourcePath = source.uri.toString();
-    } else if (source.uriKind == UriKind.PACKAGE_URI) {
+    } else if (source.uri.isScheme('package')) {
       sourcePath = _relative(source.fullName);
       if (sourcePath == source.fullName) {
         // If we weren't able to shorten the path name, use the package: version.

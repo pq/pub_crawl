@@ -132,7 +132,7 @@ class Criteria {
 
 /// A simple visitor for analysis options files.
 abstract class AnalysisOptionsVisitor {
-  void visit(AnalysisOptionsFile file) {}
+  void visit(AnalysisOptionsFile options) {}
 }
 
 class AnalysisOptionsFile {
@@ -151,7 +151,7 @@ class AnalysisOptionsFile {
 
 /// A simple visitor for pubspec files.
 abstract class PubspecFileVisitor {
-  void visit(PubspecFile file) {}
+  void visit(PubspecFile pubspec) {}
 }
 
 /// A simple visitor for package roots.
