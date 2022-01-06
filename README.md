@@ -1,7 +1,7 @@
 # Pub Crawl 🍻
 
 A tool for fetching and exploring Dart packages published on 
-[`pub`](https://pub.dartlang.org/).
+[`pub`](https://pub.dev/).
 
 [![Build Status](https://github.com/pq/pub_crawl/actions/workflows/dart.yml/badge.svg)](https://github.com/pq/pub_crawl/actions)
 
