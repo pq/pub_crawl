@@ -92,8 +92,21 @@ class Metrics {
   Metrics(this._data);
 
   int get grantedPoints => _data['score']['grantedPoints'];
-  int get popularity => (_data['score']['popularityScore']*100).round();
-  int get likes => _data['score']['likeCount'];
+  int get popularity {
+    try {
+      return (_data['score']['popularityScore'] * 100).round();
+    } catch (_) {
+      return -1;
+    }
+  }
+  int get likes
+   {
+    try {
+      return _data['score']['likeCount'];
+    } catch (_) {
+      return -1;
+    }
+  }
 }
 
 abstract class Package {
