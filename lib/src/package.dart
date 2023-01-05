@@ -99,8 +99,8 @@ class Metrics {
       return -1;
     }
   }
-  int get likes
-   {
+
+  int get likes {
     try {
       return _data['score']['likeCount'];
     } catch (_) {
