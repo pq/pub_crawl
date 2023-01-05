@@ -28,8 +28,8 @@ that allows you to customize behavior in provided "hook" classes.
 Supported commands are:
 
 * `fetch` - fetch packages that match given criteria (for example, 
-  `fetch --max 5 --criteria flutter,min_score:75` fetches 5 Flutter packages
-  whose pub score is 75 or higher)
+  `fetch --max 5 --criteria flutter,min_score:75,min_likes:10` fetches 5 
+  Flutter packages whose pub score is 75 or higher with at least 10 likes)
 * `analyze` - analyze packages (✋ **DEPRECATED** -- consider 
   [`package:surveyor`][surveyor] instead)
 * `lint` - a variation of `analyze` that makes it easy to lint packages with
@@ -54,6 +54,10 @@ out of the box:
 
 * `flutter` - filters on packages that depend on Flutter
 * `min_score:` - filters on overall pub package score (see the
+  [pub scoring docs] for details)
+* `min_popularity:` - filters on overall pub package popularity (see the
+  [pub scoring docs] for details)
+* `min_likes:` - filters on overall pub package likes (see the
   [pub scoring docs] for details)
 
 Using criteria we can limit a `fetch` to Flutter packages that score 75 or

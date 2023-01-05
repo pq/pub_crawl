@@ -29,7 +29,10 @@ Future<String> getBody(String url) async => (await getResponse(url)).body;
 Future<http.Response> getResponse(String url) async => _client
     .get(Uri.parse(url), headers: const {'User-Agent': 'dart.pkg.pub_crawl'});
 
-int toInt(Object value) {
+int toInt(Object? value, {String? onNull}) {
+  if (value == null) {
+    throw Exception(onNull ?? 'Unexpected null value in toInt');
+  }
   if (value is int) {
     return value;
   }
@@ -111,14 +114,22 @@ class Criteria {
           onFail: (_) => 'does not use $value',
         );
       case 'min_score':
-        if (value == null) {
-          throw Exception('Argument required for "$name"');
-        }
-
-        final score = toInt(value);
+        final _value = toInt(value, onNull: 'Argument required for "$name"');
         return Criteria(
-          matches: (p) => p.pubPoints >= score,
+          matches: (p) => p.pubPoints >= _value,
           onFail: (p) => 'score too low: ${p.pubPoints}',
+        );
+      case 'min_popularity':
+        final _value = toInt(value, onNull: 'Argument required for "$name"');
+        return Criteria(
+          matches: (p) => p.popularity >= _value,
+          onFail: (p) => 'popularity too low: ${p.popularity}',
+        );
+      case 'min_likes':
+        final _value = toInt(value, onNull: 'Argument required for "$name"');
+        return Criteria(
+          matches: (p) => p.likes >= _value,
+          onFail: (p) => 'likes too low: ${p.likes}',
         );
     }
 

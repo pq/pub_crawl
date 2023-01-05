@@ -30,6 +30,12 @@ class LocalPackage extends Package {
   int pubPoints;
 
   @override
+  int popularity;
+
+  @override
+  int likes;
+
+  @override
   Map<String, dynamic>? pubspec;
 
   @override
@@ -48,6 +54,8 @@ class LocalPackage extends Package {
     required this.name,
     required this.version,
     required this.pubPoints,
+    required this.popularity,
+    required this.likes,
     required this.dir,
   });
 
@@ -84,6 +92,21 @@ class Metrics {
   Metrics(this._data);
 
   int get grantedPoints => _data['score']['grantedPoints'];
+  int get popularity {
+    try {
+      return (_data['score']['popularityScore'] * 100).round();
+    } catch (_) {
+      return -1;
+    }
+  }
+
+  int get likes {
+    try {
+      return _data['score']['likeCount'];
+    } catch (_) {
+      return -1;
+    }
+  }
 }
 
 abstract class Package {
@@ -104,6 +127,10 @@ abstract class Package {
 
   int get pubPoints;
 
+  int get popularity;
+
+  int get likes;
+
   Map<String, dynamic>? get pubspec;
 
   String? get repository;
@@ -119,6 +146,8 @@ abstract class Package {
     jsonData[name] = {
       'version': version,
       'pubPoints': pubPoints,
+      'popularity': popularity,
+      'likes': likes,
       'sourcePath': sourcePath,
     };
   }
@@ -135,6 +164,8 @@ abstract class Package {
       name: name,
       version: packageData['version'],
       pubPoints: packageData['pubPoints'],
+      popularity: packageData['popularity'],
+      likes: packageData['likes'],
       dir: Directory('third_party/cache/${packageData['sourcePath']}'),
     );
 
@@ -157,6 +188,10 @@ class RemotePackage extends Package {
 
   @override
   int get pubPoints => metrics?.grantedPoints ?? -1;
+  @override
+  int get popularity => metrics?.popularity ?? -1;
+  @override
+  int get likes => metrics?.likes ?? -1;
   @override
   Map<String, dynamic> get pubspec => _data['latest']['pubspec'];
 
